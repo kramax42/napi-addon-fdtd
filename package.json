@@ -1,0 +1,19 @@
+{
+  "name": "napi-addon-fdtd",
+  "version": "1.0.0",
+  "description": "Build N-API native addon with CMake and node-addon-api C++ wrapper. FDTD physics simulation",
+  "main": "index.js",
+  "scripts": {
+    "install": "cmake-js compile",
+    "test": "node index.js"
+  },
+  "keywords": [],
+  "author": "maxmaxkklosd99<pepetrov123@list.ru>",
+  "license": "ISC",
+  "dependencies": {
+    "node-addon-api": "^3.1.0"
+  },
+  "devDependencies": {
+    "cmake-js": "^6.2.1"
+  }
+}
