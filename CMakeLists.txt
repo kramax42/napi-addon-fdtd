@@ -13,7 +13,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${CMAKE_JS_INC})
 
 # Declare the location of the source files
-file(GLOB SOURCE_FILES "src/*.cpp" "src/FDTD/*.cpp" "src/FDTD/*.h")
+file(GLOB SOURCE_FILES "src/*.cpp"
+                       "src/FDTD/2D/*.cpp" "src/FDTD/2D/*.h"
+                       "src/FDTD/3D/*.cpp" "src/FDTD/3D/*.h"
+                       "src/FDTD/3D_DIFRACTION/*.cpp" "src/FDTD/3D_DIFRACTION/*.h")
 
 # This line will tell CMake that we're building a shared library
 # from the above source files

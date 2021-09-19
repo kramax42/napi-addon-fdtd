@@ -10,8 +10,8 @@
 #include <iostream>
 
 
-#include "./FDTD/FDTD_2D.h"
-#include "./FDTD/FDTD_3D.h"
+#include "./FDTD/2D/FDTD_2D.h"
+#include "./FDTD/3D/FDTD_3D.h"
 
 Napi::Value getFDTD_3D(const Napi::CallbackInfo &info)
 {
