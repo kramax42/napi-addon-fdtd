@@ -3,6 +3,10 @@
 //https://github.com/course-one/native-addon-starter-kit/blob/master/src/index.cpp
 //https://github.com/nodejs/node-addon-examples
 
+
+// NAPI DESTINATION
+//C:/Users/BOSS/AppData/Local/node-gyp/Cache/15.11.0/include/node
+
 #include <napi.h>
 #include <string>
 #include <vector>
@@ -12,6 +16,7 @@
 
 #include "./FDTD/2D/FDTD_2D.h"
 #include "./FDTD/3D/FDTD_3D.h"
+#include "./FDTD/3D_DIFRACTION/FDTD_3D_DIFRACTION.h"
 
 Napi::Value getFDTD_3D(const Napi::CallbackInfo &info)
 {
@@ -31,7 +36,7 @@ Napi::Value getFDTD_3D(const Napi::CallbackInfo &info)
     double beamsize = (double)(inputArrayCondition[1].As<Napi::Number>());
     double n1 = (double)(inputArrayCondition[2].As<Napi::Number>());
 
-    static FDTD_3D fdtd_3D = FDTD_3D(lambda, beamsize, n1);
+    static FDTD_3D_DIFRACTION fdtd_3D = FDTD_3D_DIFRACTION(lambda, beamsize, n1, 1.5);
     if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) || (fdtd_3D.getN1() != n1) || reload)
     {
        // std::cout << "Works!! " << reload << std::endl;

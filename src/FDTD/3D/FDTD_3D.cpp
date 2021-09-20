@@ -1,5 +1,4 @@
 #include "FDTD_3D.h"
-#include <iostream>
 
 FDTD_3D::FDTD_3D(double lambda, double beamsize, double n1)
 			   : lambda(lambda), beamsize(beamsize), n1(n1)
@@ -70,7 +69,6 @@ size_t FDTD_3D::getCurrentTick()
 
 void FDTD_3D::setParams()
 {
-
 	ticks = 0;
 
 	dc = 0.3;

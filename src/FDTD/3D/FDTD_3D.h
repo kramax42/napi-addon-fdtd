@@ -3,6 +3,8 @@
 using namespace std;
 
 class FDTD_3D {
+
+protected:
 	size_t ticks;
 	const double PI = 3.141592653;
 
@@ -46,7 +48,7 @@ class FDTD_3D {
 public:
 	FDTD_3D(double lambda, double beamsize, double n1);
 
-	void setParams();
+	virtual void setParams();
 
 	// Getters.
 	size_t getNx() { return Nx; }
