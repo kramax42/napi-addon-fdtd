@@ -16,7 +16,8 @@ include_directories(${CMAKE_JS_INC})
 file(GLOB SOURCE_FILES "src/*.cpp"
                        "src/FDTD/2D/*.cpp" "src/FDTD/2D/*.h"
                        "src/FDTD/3D/*.cpp" "src/FDTD/3D/*.h"
-                       "src/FDTD/3D_DIFRACTION/*.cpp" "src/FDTD/3D_DIFRACTION/*.h")
+                       "src/FDTD/3D_DIFRACTION/*.cpp" "src/FDTD/3D_DIFRACTION/*.h"
+                       "src/FDTD/3D_INTERFERENCE/*.cpp" "src/FDTD/3D_INTERFERENCE/*.h")
 
 # This line will tell CMake that we're building a shared library
 # from the above source files

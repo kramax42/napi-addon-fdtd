@@ -17,6 +17,7 @@
 #include "./FDTD/2D/FDTD_2D.h"
 #include "./FDTD/3D/FDTD_3D.h"
 #include "./FDTD/3D_DIFRACTION/FDTD_3D_DIFRACTION.h"
+#include "./FDTD/3D_INTERFERENCE/FDTD_3D_INTERFERENCE.h"
 
 // Difraction FDTD_3D.
 Napi::Value getFDTD_3D_DIFRACTION(const Napi::CallbackInfo &info)
@@ -116,6 +117,100 @@ Napi::Value getFDTD_3D_DIFRACTION(const Napi::CallbackInfo &info)
     return data;
 }
 
+// Interference FDTD_3D.
+Napi::Value getFDTD_3D_INTERFERENCE(const Napi::CallbackInfo &info)
+{
+    Napi::Env env = info.Env();
+
+    const Napi::Array inputArrayCondition = info[0].As<Napi::Array>();
+    // 0 - lambda.
+    // 1 - beamsize.
+    // 2 - n1.
+
+    // Reload current params?
+    bool reload = static_cast<bool>(info[1].As<Napi::Boolean>());
+
+    int first = 0;                                                         //????
+    double lambda = (double)inputArrayCondition[first].As<Napi::Number>(); //????
+    double beamsize = (double)(inputArrayCondition[1].As<Napi::Number>());
+    double n1 = (double)(inputArrayCondition[2].As<Napi::Number>());
+
+    static FDTD_3D_INTERFERENCE fdtd_3D = FDTD_3D_INTERFERENCE(lambda, beamsize, n1);
+    if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) || (fdtd_3D.getN1() != n1) || reload)
+    {
+        // std::cout << "Works!! " << reload << std::endl;
+        fdtd_3D.setLambda(lambda);
+        fdtd_3D.setBeamsize(beamsize);
+        fdtd_3D.setN1(n1);
+        fdtd_3D.setParams();
+    }
+
+    vector<double> vectX = {};
+    vector<double> vectY = {};
+    vector<double> vectEz = {};
+    vector<double> vectHy = {};
+    vector<double> vectHx = {};
+    vector<double> vectEnergy = {};
+
+    vectX.clear();
+    vectY.clear();
+    vectEz.clear();
+    vectHy.clear();
+    vectHx.clear();
+    vectEnergy.clear();
+
+    fdtd_3D.calcNextLayer(vectX, vectY, vectEz, vectHy, vectHx, vectEnergy);
+
+    size_t Nx = fdtd_3D.getNx() / fdtd_3D.getStep();
+    size_t Ny = fdtd_3D.getNy() / fdtd_3D.getStep();
+    //size_t Nx = vectX.size();
+    //size_t Ny = vectY.size();
+
+    // Creating arrays.
+    Napi::Array jsDataX = Napi::Array::New(env, Nx * Ny);
+    Napi::Array jsDataY = Napi::Array::New(env, Nx * Ny);
+    Napi::Array jsDataEz = Napi::Array::New(env, Nx * Ny);
+    Napi::Array jsDataHy = Napi::Array::New(env, Nx * Ny);
+    Napi::Array jsDataHx = Napi::Array::New(env, Nx * Ny);
+    Napi::Array jsDataEnergy = Napi::Array::New(env, Nx * Ny);
+
+    // Temporary variables.
+    Napi::Number elem;
+
+    for (size_t i = 0; i < Nx * Ny; i++)
+    {
+        elem = Napi::Number::New(env, vectX[i]);
+        jsDataX[i] = elem;
+
+        elem = Napi::Number::New(env, vectY[i]);
+        jsDataY[i] = elem;
+
+        elem = Napi::Number::New(env, vectEz[i]);
+        jsDataEz[i] = elem;
+
+        elem = Napi::Number::New(env, vectHy[i]);
+        jsDataHy[i] = elem;
+
+        elem = Napi::Number::New(env, vectHx[i]);
+        jsDataHx[i] = elem;
+
+        elem = Napi::Number::New(env, vectEnergy[i]);
+        jsDataEnergy[i] = elem;
+    }
+
+    Napi::Object data = Napi::Array::New(env);
+    data.Set("dataX", jsDataX);
+    data.Set("dataY", jsDataY);
+    data.Set("dataEz", jsDataEz);
+    data.Set("dataHy", jsDataHy);
+    data.Set("dataHx", jsDataHx);
+    data.Set("dataEnergy", jsDataEnergy);
+    data.Set("row", Nx);
+    data.Set("col", Ny);
+    data.Set("currentTick", fdtd_3D.getCurrentTick());
+
+    return data;
+}
 
 // Plain FDTD_3D.
 Napi::Value getFDTD_3D(const Napi::CallbackInfo &info)
@@ -288,6 +383,9 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
 
     exports.Set(Napi::String::New(env, "getFDTD_3D_DIFRACTION"),
                 Napi::Function::New(env, getFDTD_3D_DIFRACTION));
+
+    exports.Set(Napi::String::New(env, "getFDTD_3D_INTERFERENCE"),
+                Napi::Function::New(env, getFDTD_3D_INTERFERENCE));
 
     // Return `exports` object (always).
     return exports;

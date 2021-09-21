@@ -42,11 +42,11 @@ protected:
 	void boundary_conditions_3();
 	void boundary_conditions_4();
 
-	void Calculation();
-
+	virtual void Calculation();
 
 public:
 	FDTD_3D(double lambda, double beamsize, double n1);
+
 
 	virtual void setParams();
 
