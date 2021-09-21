@@ -38,9 +38,9 @@ void FDTD_3D_DIFRACTION::setParams()
         // Each grid gap.
         for (size_t j = 0; j < gridGapCount; j += 2)
         {
-            for (int k = gridGap * j; k < gridGap * (j + 1); k++)
+            for (size_t k = gridGap * j; k < gridGap * (j + 1); k++)
             {
-                yy1[i][j] = n2;
+                yy1[i][k] = n2;
             }
         }
     }

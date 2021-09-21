@@ -12,12 +12,10 @@ class FDTD_3D_DIFRACTION : public FDTD_3D
     const size_t gridBeginX = 50;
     const size_t gridEndX = gridBeginX + gridGap;
 
-    const int NxP1 = 100;
-    const int NxP2 = 110;
-    const int NyP = 20;
-
 public:
     FDTD_3D_DIFRACTION(double lambda, double beamsize, double n1, double n2);
 
     virtual void setParams();
+
+    void setN2(double n) { n2 = n; }
 };
