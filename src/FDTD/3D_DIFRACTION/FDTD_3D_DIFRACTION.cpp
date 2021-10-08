@@ -1,12 +1,12 @@
 #include "FDTD_3D_DIFRACTION.h"
 
-FDTD_3D_DIFRACTION::FDTD_3D_DIFRACTION(double lambda, double beamsize, double n1, double n2)
+FDTD_3D_DIFRACTION::FDTD_3D_DIFRACTION(double lambda, double beamsize, double n1, double n2, std::vector<std::vector<double>> &matrixRefrIndex)
     : FDTD_3D(lambda, beamsize, n1), n2(n2)
 {
-    setParams();
+    setParams(matrixRefrIndex);
 }
 
-void FDTD_3D_DIFRACTION::setParams()
+void FDTD_3D_DIFRACTION::setParams(std::vector<std::vector<double>>& matrixRefrIndex)
 {
     ticks = 0;
 
@@ -28,7 +28,7 @@ void FDTD_3D_DIFRACTION::setParams()
             Hy2[i][j] = 1e-16;
             Hx1[i][j] = 1e-16;
             Hx2[i][j] = 1e-16;
-            yy1[i][j] = n1;
+            yy1[i][j] = matrixRefrIndex[i][j];
         }
     }
 

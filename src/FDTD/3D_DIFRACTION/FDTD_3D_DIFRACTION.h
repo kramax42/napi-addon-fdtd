@@ -13,9 +13,9 @@ class FDTD_3D_DIFRACTION : public FDTD_3D
     const size_t gridEndX = gridBeginX + gridGap;
 
 public:
-    FDTD_3D_DIFRACTION(double lambda, double beamsize, double n1, double n2);
+    FDTD_3D_DIFRACTION(double lambda, double beamsize, double n1, double n2, std::vector<std::vector<double>> &matrixRefrIndex);
 
-    virtual void setParams();
+    virtual void setParams(std::vector<std::vector<double>> &matrixRefrIndex);
 
     void setN2(double n) { n2 = n; }
 };

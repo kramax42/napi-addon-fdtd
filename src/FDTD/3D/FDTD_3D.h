@@ -8,8 +8,8 @@ protected:
 	size_t ticks;
 	const double PI = 3.141592653;
 
-	static const size_t Nx = 401;
-	static const size_t Ny = 401;
+	static const size_t Nx = 400;
+	static const size_t Ny = 400;
 
 	double yy1[Nx][Ny];
 
@@ -51,9 +51,9 @@ public:
 	virtual void setParams();
 
 	// Getters.
-	size_t getNx() { return Nx; }
-	size_t getNy() { return Ny; }
-	size_t getStep() { return 4; }
+	static size_t getNx() { return Nx; }
+	static size_t getNy() { return Ny; }
+	size_t getStep() { return 2; }
 
 	double getLambda() { return lambda; }
 	double getBeamsize() { return beamsize; }

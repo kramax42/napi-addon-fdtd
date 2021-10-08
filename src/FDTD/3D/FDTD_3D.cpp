@@ -92,7 +92,6 @@ void FDTD_3D::setParams()
 			yy1[i][j] = n1;
 		}
 	}
-
 }
 //---------------------------------------------------------------------------
 
@@ -127,7 +126,6 @@ void FDTD_3D::calcNextLayer(vector<double> &vectX,
 		{
 			// vectX.push_back(xx);
 			// vectY.push_back(xx);
-
 			for (int yy = 1; yy < Ny - 1; yy += step)
 			{
 				// Wem
@@ -140,7 +138,6 @@ void FDTD_3D::calcNextLayer(vector<double> &vectX,
 				vectHy.push_back(Hy1[xx][yy]);
 				vectHx.push_back(Hx1[xx][yy]);
 				vectEnergy.push_back(energy);
-		
 				}
 			}
 
