@@ -85,6 +85,24 @@ Napi::Value getFDTD_3D_DIFRACTION(const Napi::CallbackInfo &info)
         }
     }
 
+
+    int q2 = 0;
+    int q1 = 0;
+    for (int i = 0; i < Nxx; i++)
+    {
+        //std::cout << std::endl;
+        for (int j = 0; j < Nyx; j++)
+        {
+          //  std::cout << refrIndexMatrix[i][j] << " ";
+          if(refrIndexMatrix[i][j] == 2)
+              q2++;
+          else
+              q1++;
+        }
+    }
+    std::cout << q1 << " ";
+    std::cout << q2 << " ";
+
     // for (int i = 0; i < Nxx; i++)
     // {
     //     std::cout << std::endl;

@@ -1,6 +1,6 @@
 {
   "name": "napi-addon-fdtd",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Build N-API native addon with CMake and node-addon-api C++ wrapper. FDTD physics simulation",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,8 @@
   "author": "maxmaxkklosd99<pepetrov123@list.ru>",
   "license": "ISC",
   "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-react-app": "^3.1.2",
     "node-addon-api": "^3.1.0"
   },
   "devDependencies": {

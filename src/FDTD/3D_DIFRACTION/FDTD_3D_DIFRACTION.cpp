@@ -1,4 +1,5 @@
 #include "FDTD_3D_DIFRACTION.h"
+#include <iostream>
 
 FDTD_3D_DIFRACTION::FDTD_3D_DIFRACTION(double lambda, double beamsize, double n1, double n2, std::vector<std::vector<double>> &matrixRefrIndex)
     : FDTD_3D(lambda, beamsize, n1), n2(n2)
@@ -32,16 +33,17 @@ void FDTD_3D_DIFRACTION::setParams(std::vector<std::vector<double>>& matrixRefrI
         }
     }
 
+  
 
-    for (size_t i = gridBeginX; i <= gridEndX; i++)
-    {
-        // Each grid gap.
-        for (size_t j = 0; j < gridGapCount; j += 2)
-        {
-            for (size_t k = gridGap * j; k < gridGap * (j + 1); k++)
-            {
-                yy1[i][k] = n2;
-            }
-        }
-    }
+    // for (size_t i = gridBeginX; i <= gridEndX; i++)
+    // {
+    //     // Each grid gap.
+    //     for (size_t j = 0; j < gridGapCount; j += 2)
+    //     {
+    //         for (size_t k = gridGap * j; k < gridGap * (j + 1); k++)
+    //         {
+    //             yy1[i][k] = n2;
+    //         }
+    //     }
+    // }
 }
