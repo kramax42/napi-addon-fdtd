@@ -4,6 +4,7 @@
 #include "FDTD_2D.h"
 #include <iostream>
 
+
 FDTD_2D::FDTD_2D(double lambda, double tau, double n1)
                 : lambda(lambda), tau(tau), n1(n1)
 {

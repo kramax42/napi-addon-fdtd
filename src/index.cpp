@@ -5,7 +5,12 @@
 
 
 // NAPI DESTINATION
-//C:/Users/BOSS/AppData/Local/node-gyp/Cache/15.11.0/include/node
+// C:/Users/BOSS/AppData/Local/node-gyp/Cache/15.11.0/include/node
+// /usr/include/node
+// ${workspaceFolder}/**
+// https://stackoverflow.com/questions/47616834/visual-studio-code-cannot-open-source-file-iostream
+
+
 
 #include <napi.h>
 #include <string>

@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <math.h>
+
 using namespace std;
 
 class FDTD_3D {

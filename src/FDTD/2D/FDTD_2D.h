@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <napi.h>
+#include <math.h>
 
 using namespace std;
 class FDTD_2D
