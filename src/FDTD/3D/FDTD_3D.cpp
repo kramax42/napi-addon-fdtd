@@ -49,7 +49,7 @@ void FDTD_3D::Calculation()
 
 	for (int j = 1; j < Ny - 1; j++) {
 		int i = 0;
-		Ez1[i][j] = sin(2 * PI * dt * ticks) * exp(gammar * dx * dx * (yMax - j) * (j - yMax));
+		Ez1[i][j] = sin(2 * PI * dt * ticks) * std::exp(gammar * dx * dx * (yMax - j) * (j - yMax));
 		Hy1[i][j] = Ez1[i][j];
 	}
 

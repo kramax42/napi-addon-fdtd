@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <math.h>
+#include "../../globals.h"
 
 using namespace std;
 
@@ -10,8 +11,8 @@ protected:
 	size_t ticks;
 	const double PI = 3.141592653;
 
-	static const size_t Nx = 400;
-	static const size_t Ny = 400;
+	// static const size_t Nx = 400;
+	// static const size_t Ny = 400;
 
 	double yy1[Nx][Ny];
 

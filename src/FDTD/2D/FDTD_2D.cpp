@@ -85,7 +85,7 @@ void FDTD_2D::Calculation()
     }
 
     E1[Ny - 1] =
-        exp(aa1 * (tMax - dt * ticks) * (dt * ticks - tMax)) * sin(2 * PI * dt * ticks);
+        std::exp(aa1 * (tMax - dt * ticks) * (dt * ticks - tMax)) * std::sin(2 * PI * dt * ticks);
 
     H1[Ny - 1] = eps[Ny - 1] * E1[Ny - 1];
 

@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${CMAKE_JS_INC})
 
 # Declare the location of the source files
-file(GLOB SOURCE_FILES "src/*.cpp"
+file(GLOB SOURCE_FILES "src/*.cpp" "src/*.h"
                        "src/FDTD/2D/*.cpp" "src/FDTD/2D/*.h"
                        "src/FDTD/3D/*.cpp" "src/FDTD/3D/*.h"
                        "src/FDTD/3D_DIFRACTION/*.cpp" "src/FDTD/3D_DIFRACTION/*.h"
