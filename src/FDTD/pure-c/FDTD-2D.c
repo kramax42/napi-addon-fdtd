@@ -1,46 +1,7 @@
-#include <math.h>    // exp , pi
-#include <stdio.h>   // printf
-#include <stdlib.h>  // size_t
+#include "./FDTD-2D.h"
 
-// gcc FDTD-2D.c -o output -lm
 
-const double PI = M_PI;
-
-typedef struct {
-  size_t ticks;
-
-  /* Grid steps. */
-  double dx;
-  double dt;
-
-  /* const */
-  double aa1;   //??
-  double Ti;    //??
-  double tMax;  //??
-
-  /* Grid size. */
-  const size_t Nx;
-  const size_t Ny;
-
-  /* Epsilon - the dielectric constant */
-  /* Array */
-  float *eps;
-
-  /* Magnetic field strength. */
-  double *H1;
-  double *H2;
-
-  /* Electric field strength */
-  double *E1;
-  double *E2;
-
-  /* Refractive index */
-  const float n1;
-  const float lambda;
-
-} DATA_STRUCT;
-
-void set_params(DATA_STRUCT *data) {
+ void set_params(DATA_STRUCT *data) {
   /* Input conditions */
   float lambda = 1;
   float tau = 3;
@@ -98,7 +59,7 @@ void calculations(DATA_STRUCT *data) {
   data->E1[data->Ny - 1] =
       exp(data->aa1 * (data->tMax - data->dt * data->ticks) *
           (data->dt * data->ticks - data->tMax)) *
-      sin(2 * PI * data->dt * data->ticks);
+      sin(2 * M_PI * data->dt * data->ticks);
 
   data->H1[data->Ny - 1] = data->eps[data->Ny - 1] * data->E1[data->Ny - 1];
 
@@ -155,33 +116,3 @@ void calculate_next_time_layer(DATA_STRUCT *data, double *vector_x,
   data->ticks++;
 }
 
-int main(int argc, char *argv[]) {
-  DATA_STRUCT *data_struct = (DATA_STRUCT *)malloc(sizeof(DATA_STRUCT));
-
-  set_params(data_struct);
-
-  // calc time layers
-  double *vect_x = (double *)malloc(data_struct->Nx * sizeof(double));
-  double *vect_y = (double *)malloc(data_struct->Nx * sizeof(double));
-
-  for (int i = 0; i <= 100; ++i) {
-    calculate_next_time_layer(data_struct, vect_x, vect_y);
-  }
-
-  show_data(vect_y, data_struct->Nx);
-  // unsigned decimal
-  printf("%zu", data_struct->ticks);
-
-  /* Free memory */
-  free(vect_x);
-  free(vect_y);
-
-  free(data_struct->eps);
-  free(data_struct->H1);
-  free(data_struct->H2);
-  free(data_struct->E1);
-  free(data_struct->E2);
-  free(data_struct);
-
-  return 0;
-}

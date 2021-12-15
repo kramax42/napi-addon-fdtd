@@ -13,6 +13,7 @@
   "dependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-react-app": "^3.1.2",
+    "canvas": "^2.8.0",
     "node-addon-api": "^3.1.0"
   },
   "devDependencies": {
