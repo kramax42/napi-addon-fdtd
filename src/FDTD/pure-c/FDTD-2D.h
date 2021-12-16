@@ -5,7 +5,6 @@
 #include <stdio.h>   // printf
 #include <stdlib.h>  // size_t
 
-
 typedef struct {
   size_t ticks;
 
@@ -37,13 +36,25 @@ typedef struct {
   /* Refractive index */
   const float n1;
   const float lambda;
+  const float tau;
 
 } DATA_STRUCT;
 
 void calculate_next_time_layer(DATA_STRUCT *data, double *vector_x,
                                double *vector_y);
 
- void set_params(DATA_STRUCT *data);
+void set_params(DATA_STRUCT *data, float lambda, float tau, float n1);
+
+// Getters.
+size_t getNx();
+float getLambda();
+float getTau();
+float getN1();
+
+// Setters.
+void setLambda(DATA_STRUCT *data, float new_lambda) ;
+void setTau(DATA_STRUCT *data, float new_tau) ;
+void setN1(DATA_STRUCT *data, float new_n1) ;
 
 void calculations(DATA_STRUCT *data);
 

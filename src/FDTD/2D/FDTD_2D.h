@@ -2,10 +2,9 @@
 #include <vector>
 #include <napi.h>
 #include <math.h>
+#include "../../globals.h"
 
 
-
-using namespace std;
 class FDTD_2D
 {
     size_t ticks;
@@ -20,36 +19,36 @@ class FDTD_2D
     double Ti;   //??
     double tMax; //??
 
-    //grid size
-    static const size_t Nx = 2001;
-    static const size_t Ny = 501;
+    // grid size
+    // static const size_t Nx = 2001;
+    // static const size_t Ny = 501;
 
-    //epsilon - the dielectric constant
+    // epsilon - the dielectric constant
     double eps[Nx];
 
-    //magnetic field strength
+    // Magnetic field strength.
     double H1[Nx];
     double H2[Nx];
 
-    //electric field strength
+    // Electric field strength.
     double E1[Nx];
     double E2[Nx];
 
     // lambda - wave length
-    double lambda;
+    float lambda;
 
     // tau - pulse duration
-    double tau;
+    float tau;
 
-    // n1 - refractive index
-    double n1;
+    // refractive index
+    float refractive_index;
 
-
-    //Moor`s boundary condition.
-    void boundary_conditions_1();
 
     //Moor`s boundary condition.
-    void boundary_conditions_2();
+    void BoundaryConditionsFirst();
+
+    //Moor`s boundary condition.
+    void BoundaryConditionsSecond();
 
     // Updating values for new time layer.
     void Calculation();
@@ -57,26 +56,26 @@ class FDTD_2D
 
 
 public:
-    FDTD_2D(double lambda, double tau, double n1);
+    FDTD_2D(float lambda, float tau, float refractive_index);
 
     //double lambda, double tau, double n1
-    void setParams();
+    void SetParams();
 
     // Getters.
-    size_t getNx();
-    double getLambda();
-    double getTau();
-    double getN1();
+    size_t GetNx();
+    float GetLambda();
+    float GetTau();
+    float GetRefractiveIndex();
 
     // Setters.
-    void setLambda(double l) { lambda = l; }
-    void setTau(double t) { tau = t; }
-    void setN1(double n) { n1 = n; }
+    void SetLambda(float new_lambda);
+    void SetTau(float new_tau);
+    void SetRefractiveIndex(float new_refractive_index);
 
-    size_t getCurrentTick();
+    size_t GetCurrentTick();
 
     //start calculation
-    void calcNextLayer( vector<double> &vectX,
-                        vector<double> &vectY);
+    void CalcNextLayer( std::vector<double> &vectX,
+                        std::vector<double> &vectY);
 };
 

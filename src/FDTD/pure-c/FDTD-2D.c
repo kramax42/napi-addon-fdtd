@@ -1,15 +1,14 @@
 #include "./FDTD-2D.h"
 
 
- void set_params(DATA_STRUCT *data) {
+ void set_params(DATA_STRUCT *data, float lambda, float tau, float n1) {
   /* Input conditions */
-  float lambda = 1;
-  float tau = 3;
-  float n1 = 1.6;
+
 
   /* Initializing const refreactive index. */
   *(float *)&data->n1 = n1;
   *(float *)&data->lambda = lambda;
+  *(float *)&data->tau = tau;
 
   data->ticks = 0;
 
@@ -21,8 +20,8 @@
   data->tMax = 4 * tau / (lambda / 0.3);
 
   /* Initializing const grid size. */
-  *(size_t *)&data->Nx = 20;  // 2000
-  *(size_t *)&data->Ny = 5;   // 500
+  *(size_t *)&data->Nx = 2000;  // 2000
+  *(size_t *)&data->Ny = 500;   // 500
 
   data->eps = (float *)malloc(data->Nx * sizeof(float));
   data->H1 = (double *)malloc(data->Nx * sizeof(double));
