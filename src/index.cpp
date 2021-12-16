@@ -559,7 +559,7 @@ Napi::Value getFDTD_2D_pure_c(const Napi::CallbackInfo &info) {
 
 // Callback method when module is registered with Node.js.
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports.Set(Napi::String::New(env, "getFDTD_2D"),
+  exports.Set(Napi::String::New(env, "getFdtd2D"),
               Napi::Function::New(env, GetData2D));
   //_pure_c
 
