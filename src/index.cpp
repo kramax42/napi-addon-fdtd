@@ -31,15 +31,16 @@ extern "C" {
 
 // Difraction FDTD-3D.
 Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
+
   Napi::Env env = info.Env();
 
-  const Napi::Array input_array_condition = info[0].As<Napi::Array>();
   // 0 - lambda.
   // 1 - reload checker.
   // 2 - refractive index matrix(flatten).
-  // 3 - refractive index matrix(flatten) size for 2x2 - 2.
+  // 3 - refractive index matrix(flatten) size (for 2x2 is 2).
   // 4 - data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
-
+  const Napi::Array input_array_condition = info[0].As<Napi::Array>();
+  
   // Reload params checker.
   bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
 
@@ -48,16 +49,15 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
 
   // Must be even.
   int refr_index_matrix_size = static_cast<int>(info[3].As<Napi::Number>());
-  std::cout << refr_index_matrix_size << "!!!" << endl;
+
+  // Temporary matrix.
   std::vector<std::vector<double>> temp_matrix;
 
   // Data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
   int data_return_type = static_cast<int>(info[4].As<Napi::Number>());
 
   // Params transformation JS -> C++.
-  int first = 0;  //????
-  double lambda =
-      (double)input_array_condition[first].As<Napi::Number>();  //????
+  double lambda = (double)input_array_condition[(uint32_t)0].As<Napi::Number>();
   double beamsize = (double)input_array_condition[1].As<Napi::Number>();
   double n1 = (double)input_array_condition[2].As<Napi::Number>();
   double n2 = (double)input_array_condition[3].As<Napi::Number>();
@@ -73,7 +73,7 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
   }
 
   // Matrix size  coefficient.
-  size_t  coeff = Nx / refr_index_matrix_size;
+  size_t coeff = Nx / refr_index_matrix_size;
 
   // Initialization refractive index matrix.
   std::vector<std::vector<double>> refr_index_matrix;
@@ -87,9 +87,9 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
   // Filling refractive index matrix.
   for (int i = 0; i < refr_index_matrix_size; i++) {
     for (int j = 0; j < refr_index_matrix_size; j++) {
-      for (int k = 0; k <  coeff; k++) {
-        for (int f = 0; f <  coeff; f++) {
-          refr_index_matrix[i *  coeff + k][j *  coeff + f] = temp_matrix[i][j];
+      for (int k = 0; k < coeff; k++) {
+        for (int f = 0; f < coeff; f++) {
+          refr_index_matrix[i * coeff + k][j * coeff + f] = temp_matrix[i][j];
         }
       }
     }
@@ -274,12 +274,9 @@ Napi::Value getFDTD_3D(const Napi::CallbackInfo &info) {
   double beamsize = (double)(inputArrayCondition[1].As<Napi::Number>());
   double n1 = (double)(inputArrayCondition[2].As<Napi::Number>());
 
-  // static FDTD_3D_DIFRACTION fdtd_3D = FDTD_3D_DIFRACTION(lambda, beamsize,
-  // n1, 1.5);
   static FDTD_3D fdtd_3D = FDTD_3D(lambda, beamsize, n1);
   if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
       (fdtd_3D.getN1() != n1) || reload) {
-    // std::cout << "Works!! " << reload << std::endl;
     fdtd_3D.setLambda(lambda);
     fdtd_3D.setBeamsize(beamsize);
     fdtd_3D.setN1(n1);
@@ -304,8 +301,6 @@ Napi::Value getFDTD_3D(const Napi::CallbackInfo &info) {
 
   size_t Nx = fdtd_3D.getNx() / fdtd_3D.getStep();
   size_t Ny = fdtd_3D.getNy() / fdtd_3D.getStep();
-  // size_t Nx = vect_X.size();
-  // size_t Ny = vect_Y.size();
 
   // Creating arrays.
   Napi::Array js_data_X = Napi::Array::New(env, Nx * Ny);
@@ -499,7 +494,6 @@ Napi::Value getFDTD_2D_pure_c(const Napi::CallbackInfo &info) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "getFdtd2D"),
               Napi::Function::New(env, GetData2D));
-  //_pure_c
 
   exports.Set(Napi::String::New(env, "clearFDTD_2D_data"),
               Napi::Function::New(env, clear_FDTD_2D_data_pure_c));
