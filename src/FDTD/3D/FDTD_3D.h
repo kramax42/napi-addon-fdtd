@@ -56,7 +56,7 @@ public:
 	// Getters.
 	static size_t getNx() { return Nx; }
 	static size_t getNy() { return Ny; }
-	size_t getStep() { return 2; }
+	size_t getStep() { return 4; }
 
 	double getLambda() { return lambda; }
 	double getBeamsize() { return beamsize; }
