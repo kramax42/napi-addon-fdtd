@@ -95,6 +95,20 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
     }
   }
 
+  //temp
+
+// std::cout << "start" << std::endl;
+// for (int i = 0; i < Nx; i++) {
+//     std::cout << std::endl;
+//     for (int j = 0; j < Ny; j++) {
+//       std::cout << refr_index_matrix[i][j] << " ";
+//     }
+//   }
+// std::cout << "sstop" << std::endl;
+  // end temp
+
+
+
   static FDTD_3D_DIFRACTION fdtd_3D =
       FDTD_3D_DIFRACTION(lambda, beamsize, n1, n2, refr_index_matrix);
   if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
