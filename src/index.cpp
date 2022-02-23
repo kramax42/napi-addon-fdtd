@@ -25,9 +25,9 @@
 
 // https://stackoverflow.com/questions/12573816/what-is-an-undefined-reference-unresolved-external-symbol-error-and-how-do-i-fix/12574420#12574420
 // https://www.it-swarm.com.ru/ru/c%2B%2B/chto-takoe-neopredelennaya-ssylka-nerazreshennaya-vneshnyaya-oshibka-simvola-i-kak-ee-ispravit/1069256308/
-extern "C" {
-#include "./FDTD/pure-c/FDTD-2D.h"
-}
+// extern "C" {
+// #include "./FDTD/pure-c/FDTD-2D.h"
+// }
 
 // Difraction FDTD-3D.
 Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
