@@ -34,7 +34,7 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
 
   Napi::Env env = info.Env();
 
-  // 0 - lambda.
+  // 0 - conditions.
   // 1 - reload checker.
   // 2 - refractive index matrix(flatten).
   // 3 - refractive index matrix(flatten) size (for 2x2 is 2).
@@ -383,16 +383,17 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   // Using static to save save data for different function call.
   static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
 
-  // Сhecking for changes in preconditions.
   if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) ||
       (fdtd.GetRefractiveIndex() != refractive_index) || reload_check) {
-    fdtd.SetLambda(lambda);
-    fdtd.SetTau(tau);
-    fdtd.SetRefractiveIndex(refractive_index);
-    fdtd.SetParams();
+           fdtd.setLambda(lambda);
+    fdtd.setTau(tau);
+    fdtd.setRefractiveIndex(refractive_index);
+    fdtd.setParams();
   }
 
-  fdtd.CalcNextLayer(vect_X, vect_Y);
+ 
+  fdtd.CalcNextLayer(vect_X, vect_Y); 
+  size_t Nx = vect_X.size(); 
 
   // Creating JS data for response.
   Napi::Array js_data_X = Napi::Array::New(env, Nx);
@@ -412,105 +413,11 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   return data;
 }
 
-// For 2D pure c code.-----------------------------------------
-size_t ticks_checker = 0;
-DATA_STRUCT *data_struct;
-
-void set_params(DATA_STRUCT *data, float lambda, float tau, float n1);
-
-void init_2D_pure_c() {
-  data_struct = (DATA_STRUCT *)malloc(sizeof(DATA_STRUCT));
-}
-
-void free_2D_pure_c(DATA_STRUCT *data) {
-  free(data->eps);
-  free(data->H1);
-  free(data->H2);
-  free(data->E1);
-  free(data->E2);
-  free(data);
-  std::cout << "FDTD 2d data CLEARED!!";
-}
-
-void clear_FDTD_2D_data_pure_c(const Napi::CallbackInfo &info) {
-  free_2D_pure_c(data_struct);
-}
-
-Napi::Value getFDTD_2D_pure_c(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-
-  const Napi::Array inputArrayCondition = info[0].As<Napi::Array>();
-  // 0 - lambda
-  // 1 - tau
-  // 2 - n1
-
-  // Reload current params?
-  bool reload = static_cast<bool>(info[1].As<Napi::Boolean>());
-
-  int first = 0;                                                        //????
-  float lambda = (float)inputArrayCondition[first].As<Napi::Number>();  //????
-  float tau = (float)(inputArrayCondition[1].As<Napi::Number>());
-  float n1 = (float)(inputArrayCondition[2].As<Napi::Number>());
-
-  // pure c implementation.
-
-  if (ticks_checker == 0) {
-    init_2D_pure_c();
-    set_params(data_struct, lambda, tau, n1);
-  }
-
-  double *vect_X = (double *)malloc(data_struct->Nx * sizeof(double));
-  double *vect_Y = (double *)malloc(data_struct->Nx * sizeof(double));
-
-  //   static FDTD_2D fdtd = FDTD_2D(lambda, tau, n1);
-  if ((data_struct->lambda != lambda) || (data_struct->tau != tau) ||
-      (data_struct->n1 != n1) || reload) {
-    ticks_checker = 0;
-    set_params(data_struct, lambda, tau, n1);
-  }
-
-  // for (int i = 0; i < 400; ++i) {
-  calculate_next_time_layer(data_struct, vect_X, vect_Y);
-  // }
-  ticks_checker = data_struct->ticks;
-
-  size_t Nx = data_struct->Nx;
-
-  // Creating arrays.
-  Napi::Array js_data_X = Napi::Array::New(env, Nx);
-  Napi::Array js_data_Y = Napi::Array::New(env, Nx);
-
-  // Temporary variables.
-  Napi::Number elem;
-
-  for (size_t j = 0; j < Nx; j++) {
-    elem = Napi::Number::New(env, vect_X[j]);
-    js_data_X[j] = elem;
-
-    elem = Napi::Number::New(env, vect_Y[j]);
-    js_data_Y[j] = elem;
-  }
-  std::cout << ticks_checker << "\n";
-  Napi::Object data = Napi::Array::New(env);
-  data.Set("dataX", js_data_X);
-  data.Set("dataY", js_data_Y);
-  data.Set("col", Nx);
-  data.Set("currentTick", data_struct->ticks);
-
-  /* Free memory */
-  free(vect_X);
-  free(vect_Y);
-
-  return data;
-}
 
 // Callback method when module is registered with Node.js.
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "getFdtd2D"),
               Napi::Function::New(env, GetData2D));
-
-  exports.Set(Napi::String::New(env, "clearFDTD_2D_data"),
-              Napi::Function::New(env, clear_FDTD_2D_data_pure_c));
 
   exports.Set(Napi::String::New(env, "getFDTD_3D"),
               Napi::Function::New(env, getFDTD_3D));
