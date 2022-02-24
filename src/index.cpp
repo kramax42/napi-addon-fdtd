@@ -30,11 +30,11 @@
 // }
 
 // Difraction FDTD-3D.
-Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
+Napi::Value GetData3D(const Napi::CallbackInfo &info) {
 
   Napi::Env env = info.Env();
 
-  // 0 - conditions.
+  // 0 - conditions - (lambda, beamsize)
   // 1 - reload checker.
   // 2 - refractive index matrix(flatten).
   // 3 - refractive index matrix(flatten) size (for 2x2 is 2).
@@ -59,8 +59,8 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
   // Params transformation JS -> C++.
   double lambda = (double)input_array_condition[(uint32_t)0].As<Napi::Number>();
   double beamsize = (double)input_array_condition[1].As<Napi::Number>();
-  double n1 = (double)input_array_condition[2].As<Napi::Number>();
-  double n2 = (double)input_array_condition[3].As<Napi::Number>();
+  // double n1 = (double)input_array_condition[2].As<Napi::Number>();
+  // double n2 = (double)input_array_condition[3].As<Napi::Number>();
 
   // Transform input flatten matrix into 2-dimensional matrix.
   for (int i = 0; i < refr_index_matrix_size; i++) {
@@ -80,7 +80,7 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
   for (int i = 0; i < Nx; i++) {
     refr_index_matrix.push_back(std::vector<double>());
     for (int j = 0; j < Ny; j++) {
-      refr_index_matrix[i].push_back(n1);
+      refr_index_matrix[i].push_back(0);
     }
   }
 
@@ -95,28 +95,13 @@ Napi::Value GetDataDifraction3D(const Napi::CallbackInfo &info) {
     }
   }
 
-  //temp
-
-// std::cout << "start" << std::endl;
-// for (int i = 0; i < Nx; i++) {
-//     std::cout << std::endl;
-//     for (int j = 0; j < Ny; j++) {
-//       std::cout << refr_index_matrix[i][j] << " ";
-//     }
-//   }
-// std::cout << "sstop" << std::endl;
-  // end temp
-
-
 
   static FDTD_3D_DIFRACTION fdtd_3D =
-      FDTD_3D_DIFRACTION(lambda, beamsize, n1, n2, refr_index_matrix);
-  if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
-      (fdtd_3D.getN1() != n1) || reload_check) {
+      FDTD_3D_DIFRACTION(lambda, beamsize, refr_index_matrix);
+  if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize)
+       || reload_check) {
     fdtd_3D.setLambda(lambda);
     fdtd_3D.setBeamsize(beamsize);
-    fdtd_3D.setN1(n1);
-    fdtd_3D.setN2(n2);
     fdtd_3D.setParams(refr_index_matrix);
   }
 
@@ -271,96 +256,6 @@ Napi::Value getFDTD_3D_INTERFERENCE(const Napi::CallbackInfo &info) {
   return data;
 }
 
-// Plain FDTD_3D.
-Napi::Value getFDTD_3D(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-
-  const Napi::Array inputArrayCondition = info[0].As<Napi::Array>();
-  // 0 - lambda.
-  // 1 - beamsize.
-  // 2 - n1.
-
-  // Reload current params?
-  bool reload = static_cast<bool>(info[1].As<Napi::Boolean>());
-
-  int first = 0;                                                          //????
-  double lambda = (double)inputArrayCondition[first].As<Napi::Number>();  //????
-  double beamsize = (double)(inputArrayCondition[1].As<Napi::Number>());
-  double n1 = (double)(inputArrayCondition[2].As<Napi::Number>());
-
-  static FDTD_3D fdtd_3D = FDTD_3D(lambda, beamsize, n1);
-  if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
-      (fdtd_3D.getN1() != n1) || reload) {
-    fdtd_3D.setLambda(lambda);
-    fdtd_3D.setBeamsize(beamsize);
-    fdtd_3D.setN1(n1);
-    fdtd_3D.setParams();
-  }
-
-  vector<double> vect_X = {};
-  vector<double> vect_Y = {};
-  vector<double> vect_Ez = {};
-  vector<double> vect_Hy = {};
-  vector<double> vect_Hx = {};
-  vector<double> vect_Energy = {};
-
-  vect_X.clear();
-  vect_Y.clear();
-  vect_Ez.clear();
-  vect_Hy.clear();
-  vect_Hx.clear();
-  vect_Energy.clear();
-
-  fdtd_3D.calcNextLayer(vect_X, vect_Y, vect_Ez, vect_Hy, vect_Hx, vect_Energy);
-
-  size_t Nx = fdtd_3D.getNx() / fdtd_3D.getStep();
-  size_t Ny = fdtd_3D.getNy() / fdtd_3D.getStep();
-
-  // Creating arrays.
-  Napi::Array js_data_X = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Y = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Ez = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Hy = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Hx = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Energy = Napi::Array::New(env, Nx * Ny);
-
-  // Temporary variables.
-  Napi::Number elem;
-
-  for (size_t i = 0; i < Nx * Ny; i++) {
-    elem = Napi::Number::New(env, vect_X[i]);
-    js_data_X[i] = elem;
-
-    elem = Napi::Number::New(env, vect_Y[i]);
-    js_data_Y[i] = elem;
-
-    elem = Napi::Number::New(env, vect_Ez[i]);
-    js_data_Ez[i] = elem;
-
-    elem = Napi::Number::New(env, vect_Hy[i]);
-    js_data_Hy[i] = elem;
-
-    elem = Napi::Number::New(env, vect_Hx[i]);
-    js_data_Hx[i] = elem;
-
-    elem = Napi::Number::New(env, vect_Energy[i]);
-    js_data_Energy[i] = elem;
-  }
-
-  Napi::Object data = Napi::Array::New(env);
-  data.Set("dataX", js_data_X);
-  data.Set("dataY", js_data_Y);
-  data.Set("dataEz", js_data_Ez);
-  data.Set("dataHy", js_data_Hy);
-  data.Set("dataHx", js_data_Hx);
-  data.Set("dataEnergy", js_data_Energy);
-  data.Set("row", Nx);
-  data.Set("col", Ny);
-  data.Set("currentTick", fdtd_3D.getCurrentTick());
-
-  return data;
-}
-
 // FDTD method in 2D case.
 Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
@@ -416,14 +311,11 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
 // Callback method when module is registered with Node.js.
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports.Set(Napi::String::New(env, "getFdtd2D"),
+  exports.Set(Napi::String::New(env, "getData2D"),
               Napi::Function::New(env, GetData2D));
 
-  exports.Set(Napi::String::New(env, "getFDTD_3D"),
-              Napi::Function::New(env, getFDTD_3D));
-
-  exports.Set(Napi::String::New(env, "getFDTD_3D_DIFRACTION"),
-              Napi::Function::New(env, GetDataDifraction3D));
+  exports.Set(Napi::String::New(env, "getData3D"),
+              Napi::Function::New(env, GetData3D));
 
   exports.Set(Napi::String::New(env, "getFDTD_3D_INTERFERENCE"),
               Napi::Function::New(env, getFDTD_3D_INTERFERENCE));

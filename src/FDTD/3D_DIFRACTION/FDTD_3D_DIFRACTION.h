@@ -2,9 +2,6 @@
 
 class FDTD_3D_DIFRACTION : public FDTD_3D
 {
-    // n2 - refractive index
-    double n2;
-
     // Difraction grid sizes.
     const size_t gridWidth = 10;
     const size_t gridGap = 20;
@@ -19,9 +16,6 @@ class FDTD_3D_DIFRACTION : public FDTD_3D
     const size_t gridEndX = gridBeginX + gridGap;
 
 public:
-    FDTD_3D_DIFRACTION(double lambda, double beamsize, double n1, double n2, std::vector<std::vector<double>> &matrixRefrIndex);
-
+    FDTD_3D_DIFRACTION(double lambda, double beamsize, std::vector<std::vector<double>> &matrixRefrIndex);
     virtual void setParams(std::vector<std::vector<double>> &matrixRefrIndex);
-
-    void setN2(double n) { n2 = n; }
 };
