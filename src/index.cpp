@@ -273,9 +273,11 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
   // Containers to storage coordinates.
   vector<double> vect_X = {};
-  vector<double> vect_Y = {};
+  vector<double> vect_Ex = {};
+  vector<double> vect_Hy = {};
 
   // Using static to save save data for different function call.
+  // static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
   static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
 
   if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) ||
@@ -287,21 +289,24 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   }
 
  
-  fdtd.CalcNextLayer(vect_X, vect_Y); 
+  fdtd.CalcNextLayer(vect_X, vect_Ex, vect_Hy); 
   size_t Nx = vect_X.size(); 
 
   // Creating JS data for response.
   Napi::Array js_data_X = Napi::Array::New(env, Nx);
-  Napi::Array js_data_Y = Napi::Array::New(env, Nx);
+  Napi::Array js_data_Ex = Napi::Array::New(env, Nx);
+  Napi::Array js_data_Hy = Napi::Array::New(env, Nx);
 
   for (size_t i = 0; i < Nx; i++) {
     js_data_X[i] = Napi::Number::New(env, vect_X[i]);
-    js_data_Y[i] = Napi::Number::New(env, vect_Y[i]);
+    js_data_Ex[i] = Napi::Number::New(env, vect_Ex[i]);
+    js_data_Hy[i] = Napi::Number::New(env, vect_Hy[i]);
   }
 
   Napi::Object data = Napi::Array::New(env);
   data.Set("dataX", js_data_X);
-  data.Set("dataY", js_data_Y);
+  data.Set("dataEx", js_data_Ex);
+  data.Set("dataHy", js_data_Hy);
   data.Set("col", Nx);
   data.Set("currentTick", fdtd.GetCurrentTick());
 

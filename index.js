@@ -9,7 +9,7 @@ for (let j = 0; j < 150; ++j) {
 
 const fs = require("fs");
 const path = require("path");
-fs.writeFileSync(path.resolve(__dirname, "tmp.txt"), JSON.stringify(data.dataY), function (err) {
+fs.writeFileSync(path.resolve(__dirname, "tmp.txt"), JSON.stringify(data.dataHy), function (err) {
   if (err) {
     return console.log(err);
   }
