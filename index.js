@@ -1,10 +1,14 @@
 var addon = require("./build/Release/napi-addon-fdtd.node");
 
+
 module.exports = addon;
 
+
 let data = addon.getData2D([1, 10, 1], true);
+
 for (let j = 0; j < 150; ++j) {
   data = addon.getData2D([1, 10, 1], false);
+
 }
 
 const fs = require("fs");

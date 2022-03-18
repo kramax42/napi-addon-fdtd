@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "./FDTD/2D/FDTD_2D.h"
+#include "./FDTD/2D_UPDATED/FDTD_2D_UPDATED.h"
 #include "./FDTD/3D/FDTD_3D.h"
 #include "./FDTD/3D_DIFRACTION/FDTD_3D_DIFRACTION.h"
 // #include "./FDTD/3D_DIFRACTION/get-data-difraction-3d.cpp"
@@ -278,7 +279,7 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
   // Using static to save save data for different function call.
   // static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
-  static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
+  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, refractive_index);
 
   if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) ||
       (fdtd.GetRefractiveIndex() != refractive_index) || reload_check) {
