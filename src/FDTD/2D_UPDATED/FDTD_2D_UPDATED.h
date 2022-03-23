@@ -15,7 +15,7 @@ class FDTD_2D_UPDATED
     double tMax; //??
 
     // Grid size
-    static const size_t jmax = 500;
+    static const size_t jmax = 400;
     // static const size_t Ny = 501;
 
    
@@ -37,10 +37,6 @@ class FDTD_2D_UPDATED
     // tau - pulse duration
     double tau;
 
-    // refractive index
-    double refractive_index;
-
-
     //  Constants/
     double eps0 = 4.85418e-12;
     double mu0 = 1.25664e-10;
@@ -51,7 +47,7 @@ class FDTD_2D_UPDATED
     double imp0 = sqrt(mu0 / eps0);
 
     int jsource = 30;
-    int nmax = 2000;
+    int nmax = 400;
 
 
     // Wave lenght in meters.
@@ -89,22 +85,22 @@ class FDTD_2D_UPDATED
 
 
 public:
-    FDTD_2D_UPDATED(double lambda, double tau, double refractive_index);
+    FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon);
 
     //double lambda, double tau, double refractive_index
-    void setParams();
+    void setParams(std::vector<double>& Epsilon);
 
     // Getters.
     size_t GetNx();
     double GetLambda();
     double GetTau();
-    double GetRefractiveIndex();
+    // double GetRefractiveIndex();
 
     // Setters.
     double SourceFunction(double time_step);
     void setLambda(double l) { lambda = l; }
     void setTau(double t) { tau = t; }
-    void setRefractiveIndex(double n) { refractive_index = n; }
+    // void setRefractiveIndex(double n) { refractive_index = n; }
 
     size_t GetCurrentTick();
 

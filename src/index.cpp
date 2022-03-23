@@ -18,7 +18,7 @@
 
 #include "./FDTD/2D/FDTD_2D.h"
 #include "./FDTD/2D_UPDATED/FDTD_2D_UPDATED.h"
-#include "./FDTD/3D/FDTD_3D.h"
+// #include "./FDTD/3D/FDTD_3D.h"
 #include "./FDTD/3D_DIFRACTION/FDTD_3D_DIFRACTION.h"
 // #include "./FDTD/3D_DIFRACTION/get-data-difraction-3d.cpp"
 #include "./FDTD/3D_INTERFERENCE/FDTD_3D_INTERFERENCE.h"
@@ -261,11 +261,45 @@ Napi::Value getFDTD_3D_INTERFERENCE(const Napi::CallbackInfo &info) {
 Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
-  // Params - ([lambda, tau, refractive_index], reload)
+  // Params:
+  // 0 - [lambda, tau, refractive_index]
+  // 1 - reload
+  // 2 - refractive index vector.
+  // 3 - refractive index vector size.
   const Napi::Array input_array_condition = info[0].As<Napi::Array>();
+
+
+  size_t Nx = 400;
+
+// Temporary matrix.
+  std::vector<double> tmp_vector = {};
 
   // Reload params checker.
   bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
+
+
+  // Refraction index matrix transformation JS -> C++.
+  const Napi::Array epsilon_vector_js = info[2].As<Napi::Array>();
+
+  // Must be even.
+  int epsilon_vector_size = static_cast<int>(info[3].As<Napi::Number>());
+  // Transform input JS data to C++.
+  for (int i = 0; i < epsilon_vector_size; i++) {
+    tmp_vector.push_back(
+          (float)epsilon_vector_js[i].As<Napi::Number>());
+  }
+
+  // Matrix size  coefficient.
+  size_t coeff = Nx / epsilon_vector_size;
+
+  // Filling epsilon matrix.
+  std::vector<double> epsilon_vector = {};
+  for (int i = 0; i < epsilon_vector_size; i++) {  
+      for (int k = 0; k < coeff; k++) {
+          epsilon_vector.push_back(tmp_vector[i]);
+      }
+  }
+
 
   int nil = 0;  //!!!! MUST BE REFACTORED !!!!!!!
   float lambda = (float)input_array_condition[nil].As<Napi::Number>();
@@ -279,19 +313,19 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
   // Using static to save save data for different function call.
   // static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
-  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, refractive_index);
+  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector);
 
   if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) ||
-      (fdtd.GetRefractiveIndex() != refractive_index) || reload_check) {
+      reload_check) {
            fdtd.setLambda(lambda);
     fdtd.setTau(tau);
-    fdtd.setRefractiveIndex(refractive_index);
-    fdtd.setParams();
+    // fdtd.setRefractiveIndex(refractive_index)
+    fdtd.setParams(epsilon_vector);
   }
 
  
   fdtd.CalcNextLayer(vect_X, vect_Ex, vect_Hy); 
-  size_t Nx = vect_X.size(); 
+  // size_t Nx = vect_X.size(); 
 
   // Creating JS data for response.
   Napi::Array js_data_X = Napi::Array::New(env, Nx);

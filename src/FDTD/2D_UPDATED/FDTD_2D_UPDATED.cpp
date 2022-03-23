@@ -4,10 +4,10 @@
 #include <iostream>
 
 
-FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, double refractive_index)
-                : lambda(lambda), tau(tau), refractive_index(refractive_index)
+FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon)
+                : lambda(lambda), tau(tau)
 {
-    setParams();
+    setParams(Epsilon);
 }
 
 //Getters
@@ -24,13 +24,13 @@ double FDTD_2D_UPDATED::GetLambda()
     return lambda;
 }
 
-double FDTD_2D_UPDATED::GetRefractiveIndex()
-{
-    return refractive_index;
-}
+// double FDTD_2D_UPDATED::GetRefractiveIndex()
+// {
+//     return refractive_index;
+// }
 
 //double lambda = 1, double tau = 10, double refractive_index = 1
-void FDTD_2D_UPDATED::setParams()
+void FDTD_2D_UPDATED::setParams(std::vector<double>& Epsilon)
 {
     time_step = 0;
 
@@ -52,12 +52,12 @@ void FDTD_2D_UPDATED::setParams()
         Hy_prev[i] = 0;
 
         // eps[i] = refractive_index;
-        eps[i] = eps0;
+        eps[i] = Epsilon[i];
     }
 
-    for (int i = 200; i < 300; i++){
-        eps[i] = 4 * eps0;
-    }
+    // for (int i = 200; i < 300; i++){
+    //     eps[i] = 4 * eps0;
+    // }
 
     
 }
