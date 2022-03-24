@@ -266,7 +266,7 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   // 1 - reload
   // 2 - refractive index vector.
   // 3 - refractive index vector size.
-  // 4 - source position
+  // 4 - relative source position 0..1
   const Napi::Array input_array_condition = info[0].As<Napi::Array>();
 
 
@@ -290,7 +290,13 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
           (float)epsilon_vector_js[i].As<Napi::Number>());
   }
 
-  int source_position = static_cast<int>(info[4].As<Napi::Number>());
+  float relative_source_position = static_cast<float>(info[4].As<Napi::Number>());
+  
+  // Transform relative source position to absolute.
+  int source_position = (int)(relative_source_position * Nx); 
+
+  // Must be Repaired!!!!!!
+  if (source_position == 0) source_position = 1;
 
   // Matrix size  coefficient.
   size_t coeff = Nx / epsilon_vector_size;
@@ -318,11 +324,12 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   // static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
   static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector, source_position);
 
-  if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) ||
+  if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) || (fdtd.GetSourcePosition() != source_position) ||
       reload_check) {
            fdtd.setLambda(lambda);
     fdtd.setTau(tau);
     // fdtd.setRefractiveIndex(refractive_index)
+    fdtd.setSourcePosition(source_position);
     fdtd.setParams(epsilon_vector);
   }
 

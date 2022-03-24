@@ -24,6 +24,11 @@ double FDTD_2D_UPDATED::GetLambda()
     return lambda;
 }
 
+int FDTD_2D_UPDATED::GetSourcePosition()
+{
+    return source_position;
+}
+
 // double FDTD_2D_UPDATED::GetRefractiveIndex()
 // {
 //     return refractive_index;
