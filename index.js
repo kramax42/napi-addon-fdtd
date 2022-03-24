@@ -4,10 +4,10 @@ var addon = require("./build/Release/napi-addon-fdtd.node");
 module.exports = addon;
 
 
-let data = addon.getData2D([1, 10, 1], true, [1, 1.2], 2);
+let data = addon.getData2D([1, 10, 1], true, [1, 1.2], 2, 100);
 
 for (let j = 0; j < 50; ++j) {
-  data = addon.getData2D([1, 10, 1], false, [1, 1.2], 2);
+  data = addon.getData2D([1, 10, 1], false, [1, 1.2], 2, 100);
 
 }
 

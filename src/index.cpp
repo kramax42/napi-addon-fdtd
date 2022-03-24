@@ -266,6 +266,7 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   // 1 - reload
   // 2 - refractive index vector.
   // 3 - refractive index vector size.
+  // 4 - source position
   const Napi::Array input_array_condition = info[0].As<Napi::Array>();
 
 
@@ -288,6 +289,8 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
     tmp_vector.push_back(
           (float)epsilon_vector_js[i].As<Napi::Number>());
   }
+
+  int source_position = static_cast<int>(info[4].As<Napi::Number>());
 
   // Matrix size  coefficient.
   size_t coeff = Nx / epsilon_vector_size;
@@ -313,7 +316,7 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
   // Using static to save save data for different function call.
   // static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
-  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector);
+  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector, source_position);
 
   if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) ||
       reload_check) {

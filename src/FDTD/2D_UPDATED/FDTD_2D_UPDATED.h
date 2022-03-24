@@ -46,7 +46,7 @@ class FDTD_2D_UPDATED
 
     double imp0 = sqrt(mu0 / eps0);
 
-    int jsource = 30;
+    int source_position = 0;
     int nmax = 400;
 
 
@@ -85,7 +85,7 @@ class FDTD_2D_UPDATED
 
 
 public:
-    FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon);
+    FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon, int source_position);
 
     //double lambda, double tau, double refractive_index
     void setParams(std::vector<double>& Epsilon);
@@ -94,12 +94,14 @@ public:
     size_t GetNx();
     double GetLambda();
     double GetTau();
+    int GetSourcePosition();
     // double GetRefractiveIndex();
 
     // Setters.
     double SourceFunction(double time_step);
     void setLambda(double l) { lambda = l; }
     void setTau(double t) { tau = t; }
+    void setSourcePosition(int new_source_pos) { source_position = new_source_pos; }
     // void setRefractiveIndex(double n) { refractive_index = n; }
 
     size_t GetCurrentTick();

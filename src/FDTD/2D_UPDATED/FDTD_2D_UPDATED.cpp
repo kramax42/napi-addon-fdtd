@@ -4,8 +4,8 @@
 #include <iostream>
 
 
-FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon)
-                : lambda(lambda), tau(tau)
+FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon, int source_position)
+                : lambda(lambda), tau(tau), source_position(source_position)
 {
     setParams(Epsilon);
 }
@@ -171,8 +171,8 @@ void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
     }
 
     //  Magnetic field source.
-    Hy[jsource - 1] -= SourceFunction(time_step) / imp0;
-    Hy_prev[jsource - 1] = Hy[jsource - 1];
+    Hy[source_position - 1] -= SourceFunction(time_step) / imp0;
+    Hy_prev[source_position - 1] = Hy[source_position - 1];
 
     //  Update electric field boundaries.
     Ex[0] = Ex_prev[1];
@@ -185,8 +185,8 @@ void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
     }
 
     //  Electric field source.
-    Ex[jsource - 1] -= SourceFunction(time_step + 1);
-    Ex_prev[jsource] = Ex[jsource];
+    Ex[source_position - 1] -= SourceFunction(time_step + 1);
+    Ex_prev[source_position] = Ex[source_position];
 
 
 
