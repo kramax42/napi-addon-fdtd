@@ -90,7 +90,8 @@ Napi::Value GetData3D(const Napi::CallbackInfo &info) {
     for (int j = 0; j < refr_index_matrix_size; j++) {
       for (int k = 0; k < coeff; k++) {
         for (int f = 0; f < coeff; f++) {
-          refr_index_matrix[i * coeff + k][j * coeff + f] = temp_matrix[i][j];
+          // Rotate matrix on 90 degree for correctness in numerical method.
+          refr_index_matrix[j * coeff + f][i * coeff + k] = temp_matrix[i][j];
         }
       }
     }
@@ -267,13 +268,16 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   // 2 - refractive index vector.
   // 3 - refractive index vector size.
   // 4 - relative source position 0..1
+  // 5 - conductivity vector.
   const Napi::Array input_array_condition = info[0].As<Napi::Array>();
 
 
   size_t Nx = 400;
 
-// Temporary matrix.
+  // Temporary matrix.
   std::vector<double> tmp_vector = {};
+  std::vector<double> tmp_vector_omega = {};
+
 
   // Reload params checker.
   bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
@@ -282,13 +286,24 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   // Refraction index matrix transformation JS -> C++.
   const Napi::Array epsilon_vector_js = info[2].As<Napi::Array>();
 
+  // Omega matrix transformation JS -> C++.
+  const Napi::Array omega_vector_js = info[5].As<Napi::Array>();
+
   // Must be even.
   int epsilon_vector_size = static_cast<int>(info[3].As<Napi::Number>());
+
   // Transform input JS data to C++.
   for (int i = 0; i < epsilon_vector_size; i++) {
     tmp_vector.push_back(
           (float)epsilon_vector_js[i].As<Napi::Number>());
   }
+
+  // Comductivity(omega).
+  for (int i = 0; i < epsilon_vector_size; i++) {
+    tmp_vector_omega.push_back(
+          (float)omega_vector_js[i].As<Napi::Number>());
+  }
+
 
   float relative_source_position = static_cast<float>(info[4].As<Napi::Number>());
   
@@ -309,6 +324,14 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
       }
   }
 
+  // Filling conductivity(omega) matrix.
+  std::vector<double> omega_vector = {};
+  for (int i = 0; i < epsilon_vector_size; i++) {  
+      for (int k = 0; k < coeff; k++) {
+          omega_vector.push_back(tmp_vector_omega[i]);
+      }
+  }
+
 
   int nil = 0;  //!!!! MUST BE REFACTORED !!!!!!!
   float lambda = (float)input_array_condition[nil].As<Napi::Number>();
@@ -322,15 +345,17 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
   // Using static to save save data for different function call.
   // static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
-  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector, source_position);
+  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector, omega_vector, source_position);
 
-  if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau) || (fdtd.GetSourcePosition() != source_position) ||
+  if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau)
+   || (fdtd.GetSourcePosition() != source_position)
+    ||
       reload_check) {
            fdtd.setLambda(lambda);
     fdtd.setTau(tau);
     // fdtd.setRefractiveIndex(refractive_index)
     fdtd.setSourcePosition(source_position);
-    fdtd.setParams(epsilon_vector);
+    fdtd.setParams(epsilon_vector, omega_vector);
   }
 
  
