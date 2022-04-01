@@ -9,17 +9,11 @@ class FDTD_2D_UPDATED
     size_t time_step;
     const double PI = 3.141592653;  
 
-     // Constants
-    double aa1;  //??
-    double Ti;   //??
-    double tMax; //??
-
+ 
     // Grid size
-    static const size_t jmax = 300;
-    // static const size_t Ny = 501;
+    static const size_t jmax = 400;
 
    
-
     double ca[jmax];
     double cb[jmax];
 
@@ -30,23 +24,17 @@ class FDTD_2D_UPDATED
     // omega - conductivity
     double omega[jmax];
 
-    //magnetic field strength
+    // Magnetic field strength.
     double Hy[jmax];
-    // double Hy_prev[jmax];
 
-    //electric field strength
+    // Electric field strength.
     double Ex[jmax];
-    // double Ex_prev[jmax];
 
     // lambda - wave length
     double lambda;
 
     // tau - pulse duration
     double tau;
-
-    //  Constants/
-    // double eps0 = 4.85418e-12;
-    // double mu0 = 1.25664e-10;
 
     // Light speed.
     double c0 = 3e8;
@@ -64,28 +52,22 @@ class FDTD_2D_UPDATED
 
 
 
-    // Wave lenght in meters.
-    // double lambda_min = 500e-6;
 
+    // Frequency in MHz.
     double freq_in = 700e6;
 
     double lambda0 = c0 / freq_in;
 
     double epsz = 8.854e-12;
-    double sigma = 0.04;
 
     //  Grid steps.
-    double dx = lambda0 / 40;
+    double dx = lambda0 / 25;
     double dt = dx / (2*c0);
 
     double t0 = 50;
     int spread = 10;
 
 
-
-
-    // Absorbing boundary condition.
-    void BoundaryConditions();
 
     // Moor`s boundary condition.
     // void BoundaryConditionsFirst();
@@ -94,15 +76,14 @@ class FDTD_2D_UPDATED
     // void BoundaryConditionsSecond();
 
     // Updating values for new time layer.
-    void Calculation();
+    // void Calculation();
 
-
+    
 
 
 public:
     FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon, std::vector<double>& Omega, int source_position);
 
-    //double lambda, double tau, double refractive_index
     void setParams(std::vector<double>& Epsilon, std::vector<double>& Omega);
 
     // Getters.

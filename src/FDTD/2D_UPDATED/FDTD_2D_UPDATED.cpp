@@ -11,11 +11,13 @@ FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>&
 }
 
 //Getters
-size_t FDTD_2D_UPDATED::GetNx() {
+size_t FDTD_2D_UPDATED::GetNx() 
+{
      return jmax;
 }
 
-double FDTD_2D_UPDATED::GetTau(){
+double FDTD_2D_UPDATED::GetTau()
+{
     return tau;
 }
 
@@ -34,27 +36,13 @@ void FDTD_2D_UPDATED::setParams(std::vector<double>& Epsilon, std::vector<double
 {
     time_step = 0;
 
-    // Grid steps.
-    // dx = 0.05;
-    // dt = 0.025;
-
-
-    // Physics params.
-    // aa1 = lambda * lambda / (0.09 * tau * tau);
-    // tMax = 4 * tau / (lambda / 0.3);
-
-
     float eaf;
 
     for (int i = 0; i < jmax; i++)
     {
         Ex[i] = 0;
-        // Ex_prev[i] = 0;
-
         Hy[i] = 0;
-        // Hy_prev[i] = 0;
-
-        // eps[i] = refractive_index;
+    
         eps[i] = Epsilon[i];
         omega[i] = Omega[i];
 
@@ -84,44 +72,25 @@ double FDTD_2D_UPDATED::SourceFunction(double time_step)
     return exp(-pow((time_step - t0),2) / pow(tau,2)) * sin(w0 * time_step * dt);
 }
 
-void FDTD_2D_UPDATED::Calculation() {
-    // Calculate the Ex field.
-    for (int k = 1; k < jmax; ++k) {
-        Ex[k] = ca[k] * Ex[k] + cb[k] * (Hy[k - 1] - Hy[k]);
-        // Ex[k] = Ex[k] + cfl_factor * (Hy[k - 1] - Hy[k]);
-    }
-}
-
 void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
                         std::vector<double> &vectEx,
                         std::vector<double> &vectHy)
 {
 
-
-
-    
-
-    // Ex[jmax - 1] = Ex_prev[jmax - 2];
-    // Ex[0] = Ex_prev[1];
+    // Calculate the Ex field.
+    for (int k = 1; k < jmax; ++k) 
+    {
+        Ex[k] = ca[k] * Ex[k] + cb[k] * (Hy[k - 1] - Hy[k]);
+    }
 
     //  Electromagnetic "hard" source.
     //  Put a Gaussian pulse in the middle.
     double pulse = exp(-cfl_factor * pow((t0 - time_step) / spread, 2));//* sin(freq_in * time_step * dt);
 
-    ///asdasdasdas!!!!!!!!!!!!!!!!!!!!
-    // pulse  = 0.2; //sin(time_step);
-
-    // int source_dist = 0;
-
-    // source_position = jmax * 0.4;
-    
-
-    /////-----------------------
     Ex[source_position] += pulse;
-    // Ex_prev[source_position] = Ex[source_position];
 
 
-    //  Absorbing Boundary Conditions
+    // Absorbing Boundary Conditions.
     Ex[0] = boundary_low.front();
     boundary_low.erase(boundary_low.begin());
     boundary_low.push_back(Ex[1]);
@@ -130,50 +99,14 @@ void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
     boundary_high.push_back(Ex[jmax - 2]);
 
     //  Calculate the Hy field.
-    for (int k = 0; k < jmax-1; ++k) {
+    for (int k = 0; k < jmax-1; ++k) 
+    {
         Hy[k] = Hy[k] + cfl_factor * (Ex[k] - Ex[k + 1]);
     }
-    // Calculation();
-    // BoundaryConditionsFirst();
-    // BoundaryConditionsSecond();
-
-    //  Update magnetic field boundaries.
-    // Hy[jmax - 1] = Hy_prev[jmax - 2];
-
     
-    // for(int j = 0; j < (jmax - 1); ++j) 
-    // {
-    //     // Hy[j] = Hy_prev[j] + dt / (dx * mu0) * (Ex[j + 1] - Ex[j]);
-    //     Hy[j] = ca[j] * Hy_prev[j] + cb[j] * (Ex[j + 1] - Ex[j]);
-    //     Hy_prev[j] = Hy[j];
-    // }
 
-    // //  Magnetic field source.
-    // Hy[source_position - 1] -= SourceFunction(time_step) / imp0;
-    // Hy_prev[source_position - 1] = Hy[source_position - 1];
-
-    // //  Update electric field boundaries.
-    // Ex[0] = Ex_prev[1];
-
-    // //  Update electric field.
-    // for(int j = 1; j < jmax; ++j) 
-    // {
-    //     // Ex[j] = Ex_prev[j] + dt / (dx * eps[j]) * (Hy[j] - Hy[j - 1]);
-    //     Ex[j] = ca[j] * Ex_prev[j] + cb[j] * (Hy[j] - Hy[j - 1]);
-        
-    //     Ex_prev[j] = Ex[j];
-    // }
-
-    // //  Electric field source.
-    // Ex[source_position - 1] -= SourceFunction(time_step + 1);
-    // Ex_prev[source_position] = Ex[source_position];
-
-
-
-    for (int i = 0; i < jmax; i++)
+    for (int i = 0; i < jmax; i++) 
     {
-        // Ex_prev[i] = Ex[i];
-      
         vectX.push_back(i);
         vectEx.push_back(Ex[i]);
         vectHy.push_back(Hy[i]);
