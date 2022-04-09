@@ -4,10 +4,10 @@
 #include <iostream>
 
 
-FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon, std::vector<double>& Omega, int source_position)
-                : lambda(lambda), tau(tau), source_position(source_position)
+FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon, std::vector<double>& Sigma, std::vector<int> src)
+                : lambda(lambda), tau(tau)
 {
-    setParams(Epsilon, Omega);
+    setParams(Epsilon, Sigma, src);
 }
 
 //Getters
@@ -32,11 +32,16 @@ int FDTD_2D_UPDATED::GetSourcePosition()
 }
 
 //double lambda = 1, double tau = 10, double refractive_index = 1
-void FDTD_2D_UPDATED::setParams(std::vector<double>& Epsilon, std::vector<double>& Omega)
+void FDTD_2D_UPDATED::setParams(std::vector<double>& Epsilon, std::vector<double>& Sigma, std::vector<int> src)
 {
     time_step = 0;
 
     float eaf;
+
+    // for (int i = 0; i < src.size(); i++){
+    //     source_position_vector.push_back(src[i]);
+    // }
+    source_position_vector = src;
 
     for (int i = 0; i < jmax; i++)
     {
@@ -44,11 +49,12 @@ void FDTD_2D_UPDATED::setParams(std::vector<double>& Epsilon, std::vector<double
         Hy[i] = 0;
     
         eps[i] = Epsilon[i];
-        omega[i] = Omega[i];
+        sigma[i] = Sigma[i];
 
-        eaf = dt * omega[i] / (2 * epsz * eps[i]);
-        ca[i] = (1 - eaf) / (1 + eaf);
-        cb[i] = cfl_factor / (eps[i] * (1 + eaf));
+        // eaf = dt * sigma[i] / (2 * epsz * eps[i]);
+        // ca[i] = (1 - eaf) / (1 + eaf);
+        // cb[i] = cfl_factor / (eps[i] * (1 + eaf));
+        cb[i] = cfl_factor / eps[i];
         
     }
 
@@ -60,17 +66,17 @@ size_t FDTD_2D_UPDATED::GetCurrentTick()
     return time_step;
 }
 
-double FDTD_2D_UPDATED::SourceFunction(double time_step) 
-{
-    double lambda_0 = 800e-6;
+// double FDTD_2D_UPDATED::SourceFunction(double time_step) 
+// {
+//     double lambda_0 = 800e-6;
 
-    //  Frequency
-    double w0 = c0 / lambda_0;
-    double tau = 50;
-    double t0 = tau * 1;
+//     //  Frequency
+//     double w0 = c0 / lambda_0;
+//     double tau = 50;
+//     double t0 = tau * 1;
 
-    return exp(-pow((time_step - t0),2) / pow(tau,2)) * sin(w0 * time_step * dt);
-}
+//     return exp(-pow((time_step - t0),2) / pow(tau,2)) * sin(w0 * time_step * dt);
+// }
 
 void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
                         std::vector<double> &vectEx,
@@ -80,14 +86,18 @@ void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
     // Calculate the Ex field.
     for (int k = 1; k < jmax; ++k) 
     {
-        Ex[k] = ca[k] * Ex[k] + cb[k] * (Hy[k - 1] - Hy[k]);
+        // Ex[k] = ca[k] * Ex[k] + cb[k] * (Hy[k - 1] - Hy[k]);
+        Ex[k] = Ex[k] + cb[k] * (Hy[k - 1] - Hy[k]);
     }
 
     //  Electromagnetic "hard" source.
     //  Put a Gaussian pulse in the middle.
     double pulse = exp(-cfl_factor * pow((t0 - time_step) / spread, 2));//* sin(freq_in * time_step * dt);
 
-    Ex[source_position] += pulse;
+    for (int i = 0; i < source_position_vector.size(); i++){
+        Ex[source_position_vector[i]] += pulse;
+    }
+    
 
 
     // Absorbing Boundary Conditions.
@@ -162,10 +172,10 @@ void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
 // #include <iostream>
 
 
-// FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon, std::vector<double>& Omega, int source_position)
+// FDTD_2D_UPDATED::FDTD_2D_UPDATED(double lambda, double tau, std::vector<double>& Epsilon, std::vector<double>& sigma, int source_position)
 //                 : lambda(lambda), tau(tau), source_position(source_position)
 // {
-//     setParams(Epsilon, Omega);
+//     setParams(Epsilon, sigma);
 // }
 
 // //Getters
@@ -188,7 +198,7 @@ void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
 // }
 
 // //double lambda = 1, double tau = 10, double refractive_index = 1
-// void FDTD_2D_UPDATED::setParams(std::vector<double>& Epsilon, std::vector<double>& Omega)
+// void FDTD_2D_UPDATED::setParams(std::vector<double>& Epsilon, std::vector<double>& sigma)
 // {
 //     time_step = 0;
 
@@ -214,9 +224,9 @@ void FDTD_2D_UPDATED::CalcNextLayer( std::vector<double> &vectX,
 
 //         // eps[i] = refractive_index;
 //         eps[i] = Epsilon[i];
-//         omega[i] = Omega[i];
+//         sigma[i] = sigma[i];
 
-//         eaf = dt * omega[i] / (2 * eps[i]);
+//         eaf = dt * sigma[i] / (2 * eps[i]);
 //         ca[i] = (1.0 - eaf) / (1.0 + eaf);
 //         cb[i] = cfl_factor / (eps[i] * (1 + eaf));
         

@@ -14,7 +14,7 @@ class FDTD_2D
     double tMax; //??
 
     // Grid size
-    static const size_t Nx = 2001;
+    static const size_t Nx = 800;
     static const size_t Ny = 501;
 
     // Grid steps.
@@ -25,13 +25,13 @@ class FDTD_2D
     double eps[Nx];
 
     //magnetic field strength
-    double Hy1[Nx];
-    double Hy2[Nx];
+    double Hy[Nx];
+    double Hy_prev[Nx];
 
 
     //electric field strength
-    double Ex1[Nx];
-    double Ex2[Nx];
+    double Ex[Nx];
+    double Ex_prev[Nx];
 
     // lambda - wave length
     double lambda;

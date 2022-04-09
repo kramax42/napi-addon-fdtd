@@ -45,10 +45,10 @@ void FDTD_2D::setParams()
 
     for (int i = 0; i < Nx; i++)
     {
-        Ex1[i] = 1e-8;
-        Ex2[i] = 1e-8;
-        Hy1[i] = 1e-8;
-        Hy2[i] = 1e-8;
+        Ex_prev[i] = 1e-8;
+        Ex[i] = 1e-8;
+        Hy_prev[i] = 1e-8;
+        Hy[i] = 1e-8;
         eps[i] = refractive_index;
     }
 }
@@ -56,20 +56,20 @@ void FDTD_2D::setParams()
 // Moor`s boundary condition.
 void FDTD_2D::BoundaryConditionsFirst()
 {
-    Hy2[0] = Hy1[1] + (dt / eps[1] - dx) / (dt / eps[1] + dx) * (Hy2[1] - Hy1[0]);
+    Hy[0] = Hy_prev[1] + (dt / eps[1] - dx) / (dt / eps[1] + dx) * (Hy[1] - Hy_prev[0]);
 
-    Ex2[0] = Ex1[1] + (dt / eps[1] - dx) / (dt / eps[1] + dx) * (Ex2[1] - Ex1[0]);
+    Ex[0] = Ex_prev[1] + (dt / eps[1] - dx) / (dt / eps[1] + dx) * (Ex[1] - Ex_prev[0]);
 }
 
 //Moor`s boundary condition
 void FDTD_2D::BoundaryConditionsSecond()
 {
-    Hy2[Nx - 1] =
-        Hy1[Nx - 2] + (dt / eps[Nx - 2] - dx) * (Hy2[Nx - 2] - Hy1[Nx - 1]) /
+    Hy[Nx - 1] =
+        Hy_prev[Nx - 2] + (dt / eps[Nx - 2] - dx) * (Hy[Nx - 2] - Hy_prev[Nx - 1]) /
         (dt / eps[Nx - 2] + dx);
 
-    Ex2[Nx - 1] =
-        Ex1[Nx - 2] + (dt / eps[Nx - 2] - dx) * (Ex2[Nx - 2] - Ex1[Nx - 1]) /
+    Ex[Nx - 1] =
+        Ex_prev[Nx - 2] + (dt / eps[Nx - 2] - dx) * (Ex[Nx - 2] - Ex_prev[Nx - 1]) /
         (dt / eps[Nx - 2] + dx);
 }
 
@@ -77,25 +77,25 @@ void FDTD_2D::Calculation()
 {
     for (int i = 1; i <= Ny - 2; i++)
     {
-        Hy2[i] =
-            Hy1[i] * dt / dx - (Ex1[i] - Ex1[i - 1]);
+        Hy[i] =
+            Hy_prev[i] * dt / dx - (Ex_prev[i] - Ex_prev[i - 1]);
 
-        Ex2[i - 1] =
-            Ex1[i - 1] - (Hy2[i] - Hy2[i - 1]) * dt / (eps[i - 1] * dx);
+        Ex[i - 1] =
+            Ex_prev[i - 1] - (Hy[i] - Hy[i - 1]) * dt / (eps[i - 1] * dx);
     }
 
-    Ex1[Ny - 1] =
+    Ex_prev[Ny - 1] =
         std::exp(aa1 * (tMax - dt * ticks) * (dt * ticks - tMax)) * std::sin(2 * PI * dt * ticks);
 
-    Hy1[Ny - 1] = eps[Ny - 1] * Ex1[Ny - 1];
+    Hy_prev[Ny - 1] = eps[Ny - 1] * Ex_prev[Ny - 1];
 
     for (int i = Ny; i < Nx; i++)
     {
-        Hy2[i] =
-            Hy1[i] - (Ex1[i] - Ex1[i - 1]) * dt / dx;
+        Hy[i] =
+            Hy_prev[i] - (Ex_prev[i] - Ex_prev[i - 1]) * dt / dx;
 
-        Ex2[i - 1] =
-            Ex1[i - 1] - (Hy2[i] - Hy2[i - 1]) * dt / (eps[i - 1] * dx);
+        Ex[i - 1] =
+            Ex_prev[i - 1] - (Hy[i] - Hy[i - 1]) * dt / (eps[i - 1] * dx);
     }
 }
 
@@ -114,11 +114,11 @@ void FDTD_2D::CalcNextLayer( std::vector<double> &vectX,
 
     for (int i = 0; i < Nx; i++)
     {
-        Hy1[i] = Hy2[i];
-        Ex1[i] = Ex2[i];
+        Hy_prev[i] = Hy[i];
+        Ex_prev[i] = Ex[i];
         vectX.push_back(dx * lambda * (i - 1));
-        vectEx.push_back(Ex1[i]);
-        vectHy.push_back(Hy1[i]);
+        vectEx.push_back(Ex_prev[i]);
+        vectHy.push_back(Hy_prev[i]);
     }
 
     ticks++;

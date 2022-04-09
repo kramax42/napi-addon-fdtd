@@ -32,7 +32,6 @@
 
 // Difraction FDTD-3D.
 Napi::Value GetData3D(const Napi::CallbackInfo &info) {
-
   Napi::Env env = info.Env();
 
   // 0 - conditions - (lambda, beamsize)
@@ -41,7 +40,7 @@ Napi::Value GetData3D(const Napi::CallbackInfo &info) {
   // 3 - refractive index matrix(flatten) size (for 2x2 is 2).
   // 4 - data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
   const Napi::Array input_array_condition = info[0].As<Napi::Array>();
-  
+
   // Reload params checker.
   bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
 
@@ -97,11 +96,10 @@ Napi::Value GetData3D(const Napi::CallbackInfo &info) {
     }
   }
 
-
   static FDTD_3D_DIFRACTION fdtd_3D =
       FDTD_3D_DIFRACTION(lambda, beamsize, refr_index_matrix);
-  if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize)
-       || reload_check) {
+  if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
+      reload_check) {
     fdtd_3D.setLambda(lambda);
     fdtd_3D.setBeamsize(beamsize);
     fdtd_3D.setParams(refr_index_matrix);
@@ -146,24 +144,45 @@ Napi::Value GetData3D(const Napi::CallbackInfo &info) {
   data.Set("col", Ny);
   data.Set("currentTick", fdtd_3D.getCurrentTick());
 
+  double max;
+  double min;
+
   switch (data_return_type) {
     case 0:
       data.Set("dataEz", js_data_Ez);
+
+      max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
+      min = *std::min_element(std::begin(vect_Ez), std::end(vect_Ez));
       break;
     case 1:
       data.Set("dataHy", js_data_Hy);
+
+      max = *std::max_element(std::begin(vect_Hy), std::end(vect_Hy));
+      min = *std::min_element(std::begin(vect_Hy), std::end(vect_Hy));
       break;
     case 2:
-      data.Set("dataHx", js_data_Hy);
+      data.Set("dataHx", js_data_Hx);
+
+      max = *std::max_element(std::begin(vect_Hx), std::end(vect_Hx));
+      min = *std::min_element(std::begin(vect_Hx), std::end(vect_Hx));
       break;
     case 3:
       data.Set("dataEnergy", js_data_Energy);
+
+      max = *std::max_element(std::begin(vect_Energy), std::end(vect_Energy));
+      min = *std::min_element(std::begin(vect_Energy), std::end(vect_Energy));
       break;
 
     default:
+      max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
+      min = *std::min_element(std::begin(vect_Ez), std::end(vect_Ez));
       break;
-  }
 
+      
+  }
+  // Fill max and min values.
+  data.Set("max", max);
+  data.Set("min", min);
   return data;
 }
 
@@ -268,99 +287,103 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   // 2 - refractive index vector.
   // 3 - refractive index vector size.
   // 4 - relative source position 0..1
-  // 5 - conductivity vector.
+  // 5 - conductivity vector (sigma).
   const Napi::Array input_array_condition = info[0].As<Napi::Array>();
 
-
+  // Grid size.
   size_t Nx = 400;
 
   // Temporary matrix.
   std::vector<double> tmp_vector = {};
-  std::vector<double> tmp_vector_omega = {};
-
+  std::vector<double> tmp_vector_sigma = {};
 
   // Reload params checker.
   bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
 
-
   // Refraction index matrix transformation JS -> C++.
   const Napi::Array epsilon_vector_js = info[2].As<Napi::Array>();
 
-  // Omega matrix transformation JS -> C++.
-  const Napi::Array omega_vector_js = info[5].As<Napi::Array>();
+  // sigma matrix transformation JS -> C++.
+  const Napi::Array sigma_vector_js = info[5].As<Napi::Array>();
 
   // Must be even.
   int epsilon_vector_size = static_cast<int>(info[3].As<Napi::Number>());
 
   // Transform input JS data to C++.
   for (int i = 0; i < epsilon_vector_size; i++) {
-    tmp_vector.push_back(
-          (float)epsilon_vector_js[i].As<Napi::Number>());
+    tmp_vector.push_back((float)epsilon_vector_js[i].As<Napi::Number>());
   }
 
-  // Comductivity(omega).
+  // Comductivity(sigma).
   for (int i = 0; i < epsilon_vector_size; i++) {
-    tmp_vector_omega.push_back(
-          (float)omega_vector_js[i].As<Napi::Number>());
+    tmp_vector_sigma.push_back((float)sigma_vector_js[i].As<Napi::Number>());
   }
 
+  // Transform source position array(JS -> C++).
+  const Napi::Array relative_source_position_array = info[4].As<Napi::Array>();
 
-  float relative_source_position = static_cast<float>(info[4].As<Napi::Number>());
-  
-  // Transform relative source position to absolute.
-  int source_position = (int)(relative_source_position * Nx); 
+  std::vector<int> source_position_vector = {};
+  for (int i = 0; i < relative_source_position_array.Length(); ++i) {
+    float source_position_relative = static_cast<float>(
+        relative_source_position_array[i].As<Napi::Number>());
 
-  // Must be Repaired!!!!!!
-  if (source_position == 0) source_position = 1;
+    // Transform relative source position to absolute.
+    source_position_vector.push_back(int(source_position_relative * Nx));
+  }
 
   // Matrix size  coefficient.
   size_t coeff = Nx / epsilon_vector_size;
 
   // Filling epsilon matrix.
   std::vector<double> epsilon_vector = {};
-  for (int i = 0; i < epsilon_vector_size; i++) {  
-      for (int k = 0; k < coeff; k++) {
-          epsilon_vector.push_back(tmp_vector[i]);
-      }
+  for (int i = 0; i < epsilon_vector_size; i++) {
+    for (int k = 0; k < coeff; k++) {
+      epsilon_vector.push_back(tmp_vector[i]);
+    }
   }
 
-  // Filling conductivity(omega) matrix.
-  std::vector<double> omega_vector = {};
-  for (int i = 0; i < epsilon_vector_size; i++) {  
-      for (int k = 0; k < coeff; k++) {
-          omega_vector.push_back(tmp_vector_omega[i]);
-      }
+  // Filling conductivity(sigma) matrix.
+  std::vector<double> sigma_vector = {};
+  for (int i = 0; i < epsilon_vector_size; i++) {
+    for (int k = 0; k < coeff; k++) {
+      sigma_vector.push_back(tmp_vector_sigma[i]);
+    }
   }
 
-
-  int nil = 0;  //!!!! MUST BE REFACTORED !!!!!!!
-  float lambda = (float)input_array_condition[nil].As<Napi::Number>();
-  float tau = (float)(input_array_condition[1].As<Napi::Number>());
-  float refractive_index = (float)(input_array_condition[2].As<Napi::Number>());
+  int nil = 0;  // ! MUST BE REFACTORED
+  // float lambda = (float)input_array_condition[nil].As<Napi::Number>();
+  // float tau = (float)(input_array_condition[1].As<Napi::Number>());
+  // float refractive_index =
+  // (float)(input_array_condition[2].As<Napi::Number>());
 
   // Containers to storage coordinates.
   vector<double> vect_X = {};
   vector<double> vect_Ex = {};
   vector<double> vect_Hy = {};
 
+  double lambda = 1.0;
+  double tau = 10.0;
+  double refractive_index = 1.0;
   // Using static to save save data for different function call.
-  // static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
-  static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector, omega_vector, source_position);
+  static FDTD_2D fdtd = FDTD_2D(lambda, tau, refractive_index);
+  // static FDTD_2D_UPDATED fdtd = FDTD_2D_UPDATED(lambda, tau, epsilon_vector,
+  // sigma_vector, source_position_vector);
 
-  if ((fdtd.GetLambda() != lambda) || (fdtd.GetTau() != tau)
-   || (fdtd.GetSourcePosition() != source_position)
-    ||
-      reload_check) {
-           fdtd.setLambda(lambda);
+  if ((fdtd.GetLambda() != lambda) ||
+      (fdtd.GetTau() != tau)
+      // || (fdtd.GetSourcePosition() != src)
+      || reload_check) {
+    fdtd.setLambda(lambda);
     fdtd.setTau(tau);
     // fdtd.setRefractiveIndex(refractive_index)
-    fdtd.setSourcePosition(source_position);
-    fdtd.setParams(epsilon_vector, omega_vector);
+    // fdtd.setSourcePosition(src);
+    // fdtd.setParams(epsilon_vector, sigma_vector, source_position_vector);
+    fdtd.setParams();
   }
 
- 
-  fdtd.CalcNextLayer(vect_X, vect_Ex, vect_Hy); 
-  // size_t Nx = vect_X.size(); 
+  fdtd.CalcNextLayer(vect_X, vect_Ex, vect_Hy);
+
+  Nx = vect_X.size();
 
   // Creating JS data for response.
   Napi::Array js_data_X = Napi::Array::New(env, Nx);
@@ -373,16 +396,27 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
     js_data_Hy[i] = Napi::Number::New(env, vect_Hy[i]);
   }
 
+  double maxEx = *std::max_element(std::begin(vect_Ex), std::end(vect_Ex));
+  double minEx = *std::min_element(std::begin(vect_Ex), std::end(vect_Ex));
+
+  double maxHy = *std::max_element(std::begin(vect_Hy), std::end(vect_Hy));
+  double minHy = *std::min_element(std::begin(vect_Hy), std::end(vect_Hy));
+
+
   Napi::Object data = Napi::Array::New(env);
   data.Set("dataX", js_data_X);
   data.Set("dataEx", js_data_Ex);
   data.Set("dataHy", js_data_Hy);
   data.Set("col", Nx);
   data.Set("currentTick", fdtd.GetCurrentTick());
+  
+  data.Set("maxEx", maxEx);
+  data.Set("minEx", minEx);
+  data.Set("maxHy", maxHy);
+  data.Set("minHy", minHy);
 
   return data;
 }
-
 
 // Callback method when module is registered with Node.js.
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
