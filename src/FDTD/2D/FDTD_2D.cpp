@@ -35,13 +35,14 @@ void FDTD_2D::setParams()
     ticks = 0;
 
     // Grid steps.
+    // dx = 1 / 20
     dx = 0.05;
-    dt = 0.025;
+    dt = dx / 2;
 
 
     // Physics params.
-    aa1 = lambda * lambda / (0.09 * tau * tau);
-    tMax = 4 * tau / (lambda / 0.3);
+    aa1 = lambda * lambda / (c0 * c0 * tau * tau);
+    tMax = 3 * tau / (lambda / c0);
 
     for (int i = 0; i < Nx; i++)
     {

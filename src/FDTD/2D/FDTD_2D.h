@@ -13,9 +13,11 @@ class FDTD_2D
     double Ti;   //??
     double tMax; //??
 
-    // Grid size
+    // Grid size.
     static const size_t Nx = 800;
-    static const size_t Ny = 501;
+
+    // Source position.
+    static const size_t Ny = 200;
 
     // Grid steps.
     double dx;
@@ -32,6 +34,9 @@ class FDTD_2D
     //electric field strength
     double Ex[Nx];
     double Ex_prev[Nx];
+
+    // Normalized light speed in Gaussian system.
+    double c0 = 0.3;
 
     // lambda - wave length
     double lambda;
