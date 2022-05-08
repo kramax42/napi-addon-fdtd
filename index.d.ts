@@ -1,13 +1,17 @@
 
-type GetData3D = (
-    condition: number[],
-    reload: boolean,
-    eps: number[],
-    epsSize: number,
-    dataReturnType: number,
+type GetData2D = (
+  condition: [number, number],
+  reload: boolean,
+  materialMatrix: number[],
+  rows: number,
+  eps: number[],
+  mu: number[],
+  sigma: number[],
+  dataToReturn: number,
+  srcPositionRelativeSet: number[]
 ) => any
 
-type GetData2D = (
+type GetData1D = (
   condition: number[],
   reload: boolean,
   eps: number[],
@@ -28,6 +32,6 @@ type GetData2D = (
   // }
 
   declare module 'napi-addon-fdtd' {
-    export const getData3D: GetData3D;
     export const getData2D: GetData2D;
+    export const getData1D: GetData1D;
   }
