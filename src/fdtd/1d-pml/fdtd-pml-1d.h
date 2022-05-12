@@ -41,7 +41,7 @@ class FdtdPml1D {
     const double tau = 8.0;
 
     // Position index of source.
-    size_t src_position = 85;
+    size_t src_position = 120;
 
     // 1D grid size.
     static const size_t grid_size = 500;
@@ -114,12 +114,12 @@ public:
 
 
         // Taflove, pp 292, Eq 7.60a.
-        for(int i = 0; i <= pml_width; ++i) {
-            double sigma_in_pml = std::pow((i+1) / pml_width, m) * sigma_max;
+        for(int i = 0; i < pml_width; ++i) {
+            double sigma_in_pml = std::pow((i) / pml_width, m) * sigma_max;
 
             // Lossy electric conductivity profile.
             sigma[grid_size-pml_width+i] = sigma_in_pml;
-            sigma[pml_width-i+1] = sigma_in_pml;
+            sigma[pml_width-i-1] = sigma_in_pml;
         }                    
 
         
@@ -154,7 +154,7 @@ public:
                     std::vector<double> &vect_hy)
     {
         // Insert source in certain space grid.
-        double t = time_step * dt;
+        double t = (double)time_step * dt;
         double source = std::exp(-(std::pow((t0 - t) / tau, 2))) * std::cos(omega * t);
         ex[src_position] += source;
 
@@ -166,6 +166,7 @@ public:
         for(int i = 1; i < grid_size-1; ++i) {
             ex[i] = C[i] * ex[i] - D[i] * (hy[i] - hy[i-1]);
         }
+        ex[grid_size-1] = ex[grid_size-2];
         // ex[grid_size-1] = ex[grid_size-2];
 
         for(int i = 0; i < grid_size; ++i) {

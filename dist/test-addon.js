@@ -39,7 +39,7 @@ var test2D = function () {
     var reload = true;
     var data = index_1.default.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
     reload = false;
-    for (var j = 0; j < 200; ++j) {
+    for (var j = 0; j < 50; ++j) {
         data = index_1.default.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
     }
     console.log(data);
@@ -63,5 +63,5 @@ function testMemoryUsage() {
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
 test1D();
-test2D();
+// test2D();
 // testMemoryUsage();

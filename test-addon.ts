@@ -50,7 +50,7 @@ const test2D = () => {
   let data = addon.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
 
   reload = false;
-  for (let j = 0; j < 200; ++j) {
+  for (let j = 0; j < 50; ++j) {
     data = addon.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
   }
 
@@ -79,5 +79,5 @@ function testMemoryUsage() {
 
 
 test1D();
-test2D();
+// test2D();
 // testMemoryUsage();

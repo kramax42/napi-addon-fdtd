@@ -16,15 +16,10 @@ class FdtdPml2D
 {
 
     // Grid sizes.
-    static const size_t pml_width = 60;
+    static const size_t pml_width = 40;
 
-    static const size_t rows = 200 + pml_width*2;
-    static const size_t cols = 200 + pml_width*2;
-    // static const size_t pml_width = 2;
-
-    // static const size_t rows = 6 + pml_width*2;
-    // static const size_t cols = 6 + pml_width*2;
-
+    static const size_t rows = 220 + pml_width*2;
+    static const size_t cols = 220 + pml_width*2;
 
     // Set source position.
     size_t src_row = rows / 2;
@@ -58,9 +53,6 @@ class FdtdPml2D
     double hy[rows][cols];
 
     double gaz[rows][cols];
-
-    // Max simulation time.
-    const size_t max_time = 500;
 
     // Space grid step.
     const double ddx = 1.0e-3;
@@ -97,10 +89,21 @@ class FdtdPml2D
  
 
 public:
+    // Getters.
+    static size_t GetRows() {
+        return rows - pml_width * 2;
+    }
+
+    static size_t GetCols() {
+        return cols - pml_width * 2;
+    }
+
+
     void SetParams(std::vector<std::vector<double>>& eps,
               std::vector<std::vector<double>>& mu,
               std::vector<std::vector<double>>& sigma)
     {
+        time_step = 0;
 
         // Init field arrays.
         std::fill_n(&dz[0][0], rows * cols, 0.0);

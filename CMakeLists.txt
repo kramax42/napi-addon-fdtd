@@ -14,8 +14,8 @@ include_directories(${CMAKE_JS_INC})
 
 # Declare the location of the source files
 file(GLOB SOURCE_FILES "src/*.cpp" "src/*.h"
-                       "src/FDTD/2d-pml/*.cpp" "src/FDTD/2d-pml/*.h"
-                       "src/FDTD/1d-pml/*.cpp" "src/FDTD/1d-pml/*.h"
+                       "src/fdtd/2d-pml/*.cpp" "src/fdtd/2d-pml/*.h"
+                       "src/fdtd/1d-pml/*.cpp" "src/fdtd/1d-pml/*.h"
                        )
 
 # This line will tell CMake that we're building a shared library

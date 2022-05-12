@@ -9,7 +9,16 @@ type GetData2D = (
   sigma: number[],
   dataToReturn: number,
   srcPositionRelativeSet: number[]
-) => any
+) => {
+  dataX: number[],
+  dataY: number[],
+  dataEz: number[],
+  rows: number,
+  cols: number,
+  timeStep: number,
+  max: number,
+  min: number,
+}
 
 type GetData1D = (
   condition: number[],

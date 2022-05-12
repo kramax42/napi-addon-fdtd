@@ -11,40 +11,40 @@
 
 #include <math.h>
 #include <napi.h>
-
 #include <iostream>
 #include <string>
 #include <vector>
 
 
-#include "./FDTD/1d-pml/fdtd-pml-1d.h"
-#include "./FDTD/2d-pml/fdtd-pml-2d.h"
+#include "./fdtd/1d-pml/fdtd-pml-1d.h"
+#include "./fdtd/2d-pml/fdtd-pml-2d.h"
 
 
-
-// https://stackoverflow.com/questions/12573816/what-is-an-undefined-reference-unresolved-external-symbol-error-and-how-do-i-fix/12574420#12574420
-// https://www.it-swarm.com.ru/ru/c%2B%2B/chto-takoe-neopredelennaya-ssylka-nerazreshennaya-vneshnyaya-oshibka-simvola-i-kak-ee-ispravit/1069256308/
-
-
-// FDTD method in 1D case.
+// Fdtd method in 1D case.
 Napi::Value GetData1D(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
-  // Params:
-  // 0 - [lambda, tau, refractive_index]
+
+  // Grid size.
+  size_t grid_size = 500;
+
+  // Params(in 'info' array)):
+  // 0 - [lambda, tau]
   // 1 - reload
   // 2 - refractive index vector.
   // 3 - refractive index vector size.
   // 4 - relative source position 0..1
   // 5 - conductivity vector (sigma).
-  const Napi::Array input_array_condition = info[0].As<Napi::Array>();
 
-  // Grid size.
-  size_t grid_size = 500;
+  const Napi::Array input_array_condition = info[0].As<Napi::Array>();
+  double lambda = (float)input_array_condition[(uint32_t)0].As<Napi::Number>();
+  double tau = (float)(input_array_condition[1].As<Napi::Number>());
+
 
   // Temporary matrix.
   std::vector<double> tmp_vector = {};
   std::vector<double> tmp_vector_sigma = {};
+
 
   // Reload params checker.
   bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
@@ -52,11 +52,13 @@ Napi::Value GetData1D(const Napi::CallbackInfo &info) {
   // Refraction index matrix transformation JS -> C++.
   const Napi::Array epsilon_vector_js = info[2].As<Napi::Array>();
 
+  // Must be even.
+  int epsilon_vector_size = static_cast<int>(info[3].As<Napi::Number>());
+
   // sigma matrix transformation JS -> C++.
   const Napi::Array sigma_vector_js = info[5].As<Napi::Array>();
 
-  // Must be even.
-  int epsilon_vector_size = static_cast<int>(info[3].As<Napi::Number>());
+  
 
   // Transform input JS data to C++.
   for (int i = 0; i < epsilon_vector_size; i++) {
@@ -99,11 +101,8 @@ Napi::Value GetData1D(const Napi::CallbackInfo &info) {
     }
   }
 
-  int nil = 0;  // ! MUST BE REFACTORED
-  // float lambda = (float)input_array_condition[nil].As<Napi::Number>();
-  // float tau = (float)(input_array_condition[1].As<Napi::Number>());
-  // float refractive_index =
-  // (float)(input_array_condition[2].As<Napi::Number>());
+  
+
 
   // Containers to storage coordinates.
   std::vector<double> vect_x = {};
@@ -216,11 +215,8 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
     }
   }
 
-  // const size_t rows = 200;
-  // const size_t cols = 200;
-
-  const size_t rows = 200;
-  const size_t cols = 200;
+  const size_t rows = FdtdPml2D::GetRows();
+  const size_t cols = FdtdPml2D::GetCols();
 
   // Matrix size  coefficient.
   size_t coeff = rows / material_matrix_size;
@@ -261,18 +257,12 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   }
 
 
-
-
   static FdtdPml2D fdtd = FdtdPml2D(eps_matrix, mu_matrix, sigma_matrix);
 
-  // static FDTD_3D_DIFRACTION fdtd_3D =
-  //     FDTD_3D_DIFRACTION(lambda, beamsize, refr_index_matrix);
-  // if ((fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
-  //     reload_check) {
-  //   fdtd_3D.setLambda(lambda);
-  //   fdtd_3D.setBeamsize(beamsize);
-  //   fdtd_3D.setParams(refr_index_matrix);
-  // }
+  // (fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
+  if (reload_check) { 
+    fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix);
+  }
 
   std::vector<double> vect_X = {};
   std::vector<double> vect_Y = {};
@@ -288,19 +278,21 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
 
   // Matrix sizes.
-  size_t Nx = rows / fdtd.GetStep();
-  size_t Ny = cols / fdtd.GetStep();
+  size_t client_rows = rows / fdtd.GetStep();
+  size_t client_cols = cols / fdtd.GetStep();
+
+  const size_t js_arrays_size = client_rows * client_cols;
 
   // Creating JS arrays to store C++ arrays.
-  Napi::Array js_data_X = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Y = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Ez = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Hy = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Hx = Napi::Array::New(env, Nx * Ny);
-  Napi::Array js_data_Energy = Napi::Array::New(env, Nx * Ny);
+  Napi::Array js_data_X = Napi::Array::New(env, js_arrays_size);
+  Napi::Array js_data_Y = Napi::Array::New(env, js_arrays_size);
+  Napi::Array js_data_Ez = Napi::Array::New(env, js_arrays_size);
+  Napi::Array js_data_Hy = Napi::Array::New(env, js_arrays_size);
+  Napi::Array js_data_Hx = Napi::Array::New(env, js_arrays_size);
+  Napi::Array js_data_Energy = Napi::Array::New(env, js_arrays_size);
 
   // Filling JS arrays with C++ arrays data.
-  for (size_t i = 0; i < Nx * Ny; i++) {
+  for (size_t i = 0; i < js_arrays_size; i++) {
     js_data_X[i] = Napi::Number::New(env, vect_X[i]);
     js_data_Y[i] = Napi::Number::New(env, vect_Y[i]);
     js_data_Ez[i] = Napi::Number::New(env, vect_Ez[i]);
@@ -313,9 +305,9 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   Napi::Object data = Napi::Array::New(env);
   data.Set("dataX", js_data_X);
   data.Set("dataY", js_data_Y);
-  data.Set("row", Nx);
-  data.Set("col", Ny);
-  data.Set("currentTick", fdtd.GetCurrentTimeStep());
+  data.Set("rows", client_rows);
+  data.Set("cols", client_cols);
+  data.Set("timeStep", fdtd.GetCurrentTimeStep());
 
   
 
@@ -359,10 +351,6 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
   
   
   return data;
-
-  // Napi::Object data2 = Napi::Array::New(env);
-  // data2.Set("min", 3);
-  // return data2;
 }
 
 
