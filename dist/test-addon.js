@@ -7,16 +7,19 @@ var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var index_1 = __importDefault(require("./index"));
 var test1D = function () {
-    var condition = [1, 10, 1];
-    var eps = [1, 1.2];
-    var materialSize = 2;
-    var sigma = [0, 0.04];
-    var srcPosition = [0.4, 0.8];
-    var data = index_1.default.getData1D(condition, true, eps, materialSize, srcPosition, sigma);
-    for (var j = 0; j < 150; ++j) {
-        data = index_1.default.getData1D(condition, false, eps, materialSize, srcPosition, sigma);
-    }
-    console.log(data);
+    var condition = [3.5, 10];
+    var materialVector = [1, 0, 2, 0, 1];
+    var eps = [1.0, 1.2, 1.1];
+    var mu = [0.51, 0.5, 0.57];
+    var sigma = [1.0, 0.001, 1.0];
+    var srcPosition = [0.5];
+    var reload = true;
+    var data = index_1.default.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+    // reload = false;
+    // for (let j = 0; j < 20; ++j) {
+    //   data = addon.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+    // }
+    // console.log(data)
     fs_1.default.writeFileSync(path_1.default.resolve(__dirname, "tmp.txt"), JSON.stringify(data.dataHy), 
     // @ts-ignore
     function (err) {
@@ -27,7 +30,6 @@ var test1D = function () {
     }); // Orfs.writeFileSync('/tmp/test-sync', 'Hey there!');
 };
 var test2D = function () {
-    var epsSize = 40;
     var condition = [1, 10];
     var materialMatrix = [1, 0, 2, 0];
     var matrixSize = 2;

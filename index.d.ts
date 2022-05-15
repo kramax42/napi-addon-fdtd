@@ -21,13 +21,14 @@ type GetData2D = (
 }
 
 type GetData1D = (
-  condition: number[],
+  condition: [number, number],
   reload: boolean,
+  materialVector: number[],
+  rows: number,
   eps: number[],
-  epsSize: number,
-  sourcePositionRelative: number[],
-  sigma: number[]
-  // dataReturnType: number,
+  mu: number[],
+  sigma: number[],
+  srcPositionRelativeSet: number[]
 ) => any
 
 // interface Module {

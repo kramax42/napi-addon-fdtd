@@ -7,19 +7,22 @@ import addon from './index';
 
 const test1D = () => {
 
-  const condition = [1, 10, 1];
-  const eps = [1, 1.2];
-  const materialSize = 2;
-  const sigma = [0, 0.04];
-  const srcPosition = [0.4, 0.8];
+  const condition = [3.5, 10]
+  const materialVector = [1,0,2,0,1]
+  const eps = [1.0, 1.2, 1.1];
+  const mu = [0.51, 0.5, 0.57];
+  const sigma = [1.0, 0.001, 1.0];
+  const srcPosition = [0.5];
 
-  let data = addon.getData1D(condition, true, eps, materialSize, srcPosition, sigma);
+  let reload = true;
+  let data = addon.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
 
-  for (let j = 0; j < 150; ++j) {
-    data = addon.getData1D(condition, false, eps, materialSize, srcPosition, sigma);
-  }
+  // reload = false;
+  // for (let j = 0; j < 20; ++j) {
+  //   data = addon.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+  // }
 
-  console.log(data)
+  // console.log(data)
 
   fs.writeFileSync(
     path.resolve(__dirname, "tmp.txt"),
@@ -35,8 +38,7 @@ const test1D = () => {
 };
 
 const test2D = () => {
-  const epsSize = 40;
-
+  
   const condition = [1, 10]
   const materialMatrix = [1,0,2,0]
   const matrixSize = 2;
