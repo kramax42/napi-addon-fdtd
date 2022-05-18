@@ -3,11 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var fs_1 = __importDefault(require("fs"));
-var path_1 = __importDefault(require("path"));
 var index_1 = __importDefault(require("./index"));
 var test1D = function () {
-    var condition = [3.5, 10];
+    var condition = [3.5, 8];
     var materialVector = [1, 0, 2, 0, 1];
     var eps = [1.0, 1.2, 1.1];
     var mu = [0.51, 0.5, 0.57];
@@ -15,19 +13,22 @@ var test1D = function () {
     var srcPosition = [0.5];
     var reload = true;
     var data = index_1.default.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
-    // reload = false;
-    // for (let j = 0; j < 20; ++j) {
-    //   data = addon.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
-    // }
-    // console.log(data)
-    fs_1.default.writeFileSync(path_1.default.resolve(__dirname, "tmp.txt"), JSON.stringify(data.dataHy), 
-    // @ts-ignore
-    function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        console.log("The file was saved!");
-    }); // Orfs.writeFileSync('/tmp/test-sync', 'Hey there!');
+    reload = false;
+    for (var j = 0; j < 5; ++j) {
+        data = index_1.default.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+    }
+    console.log(data);
+    // fs.writeFileSync(
+    //   path.resolve(__dirname, "tmp.txt"),
+    //   JSON.stringify(data.dataHy),
+    //   // @ts-ignore
+    //   function (err) {
+    //     if (err) {
+    //       return console.log(err);
+    //     }
+    //     console.log("The file was saved!");
+    //   }
+    // ); // Orfs.writeFileSync('/tmp/test-sync', 'Hey there!');
 };
 var test2D = function () {
     var condition = [1, 10];

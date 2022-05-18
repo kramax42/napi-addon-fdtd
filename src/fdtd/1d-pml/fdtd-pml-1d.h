@@ -3,8 +3,19 @@
 #include <math.h>
 #include <napi.h>
 
+#include <iostream>
 #include <vector>
 #include <algorithm> // std::fill
+
+// void printArray(std::array<double> &arr)
+// {
+//     for(double& e : arr) 
+//     {
+//         std::cout << e << " ";
+//     }
+//     std::cout << std::endl;
+// }
+
 
 class FdtdPml1D
 {
@@ -42,13 +53,14 @@ class FdtdPml1D
     double tau = 8.0;
 
     // Position index of source.
-    size_t src_position = 100;
-
-    // 1D grid size.
-    static const size_t grid_size = 500;
+    size_t src_position = 5;
 
     // Width of PML layer.
-    const size_t pml_width = 50;
+    static const size_t pml_width = 50;
+
+    // 1D grid size.
+    // static const size_t grid_size = 500 + pml_width * 2;
+    static const size_t grid_size = 500;
 
     // Permitivity array.
     // double eps[grid_size];
@@ -111,8 +123,11 @@ public:
         std::vector<double> &new_sigma,
         size_t new_src_position)
     {
-        // tau = new_tau;
-        // omega = new_omega;
+
+        time_step = 0;
+
+        tau = new_tau;
+        omega = new_omega;
         src_position = new_src_position;
 
         // std::fill(&eps, grid_size, eps0);
@@ -125,12 +140,29 @@ public:
 
         for (int i = 0; i < grid_size; ++i)
         {
-            // eps[i] = new_eps[i];
-            // mu[i] = new_mu[i];
-            // sigma[i] = new_sigma[i];
-            eps[i] = eps0;
-            mu[i] = mu0;
-            sigma[i] = 0.0;
+            eps[i] = new_eps[i] * eps0;
+            mu[i] = new_mu[i] * mu0;
+            sigma[i] = new_sigma[i];
+
+            // eps[i] = eps0;
+            // mu[i] = mu0;
+            // sigma[i] = 0.0;
+            
+            
+            // if(i < pml_width) {
+            //     eps[i] = new_eps[0] * eps0;
+            //     mu[i] = new_mu[0] * mu0;
+            //     sigma[i] = new_sigma[0];
+            // } else if(i >= grid_size - pml_width) {
+            //     eps[i] = new_eps[grid_size-1-2*pml_width] * eps0;
+            //     mu[i] = new_mu[grid_size-1-2*pml_width] * mu0;
+            //     sigma[i] = new_sigma[grid_size-1-2*pml_width];
+            // } else {
+            //     eps[i] = new_eps[i-2*pml_width] * eps0;
+            //     mu[i] = new_mu[i-2*pml_width] * mu0;
+            //     sigma[i] = new_sigma[i-2*pml_width];
+            // }
+            
 
             // Electromagnetic field projections in space array.
             hy[i] = 0;
@@ -164,8 +196,14 @@ public:
             D[i] = (dt / dx) / (eps[i] + 0.5 * dt * sigma[i]);
         }
 
-        // printArr(sigma);
-        std::cout << src_position;
+        // printArray(eps);
+        // for(double& e : mu) 
+        // {
+        //     std::cout << e << " ";
+        // }
+        // std::cout << std::endl;
+        
+        // std::cout << src_position;
         // std::cout << (2 * eta * pml_width * dx);
 
     }
@@ -188,6 +226,7 @@ public:
 
     static size_t GetGridSize()
     {
+        // return grid_size - pml_width * 2;
         return grid_size;
     }
 
@@ -211,9 +250,7 @@ public:
         {
             ex[i] = C[i] * ex[i] - D[i] * (hy[i] - hy[i - 1]);
         }
-        // ex[grid_size - 1] = ex[grid_size - 2];
-        // ex[grid_size-1] = ex[grid_size-2];
-
+        
         for (int i = 0; i < grid_size; ++i)
         {
             vect_x.push_back(i);
@@ -221,7 +258,6 @@ public:
             vect_hy.push_back(hy[i]);
         }
 
-        // ex[grid_size] = ex[grid_size - 1];
         ++time_step;
     }
 

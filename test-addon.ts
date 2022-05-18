@@ -7,7 +7,7 @@ import addon from './index';
 
 const test1D = () => {
 
-  const condition = [3.5, 10]
+  const condition = [3.5, 8]
   const materialVector = [1,0,2,0,1]
   const eps = [1.0, 1.2, 1.1];
   const mu = [0.51, 0.5, 0.57];
@@ -17,24 +17,24 @@ const test1D = () => {
   let reload = true;
   let data = addon.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
 
-  // reload = false;
-  // for (let j = 0; j < 20; ++j) {
-  //   data = addon.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
-  // }
+  reload = false;
+  for (let j = 0; j < 5; ++j) {
+    data = addon.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+  }
 
-  // console.log(data)
+  console.log(data)
 
-  fs.writeFileSync(
-    path.resolve(__dirname, "tmp.txt"),
-    JSON.stringify(data.dataHy),
-    // @ts-ignore
-    function (err) {
-      if (err) {
-        return console.log(err);
-      }
-      console.log("The file was saved!");
-    }
-  ); // Orfs.writeFileSync('/tmp/test-sync', 'Hey there!');
+  // fs.writeFileSync(
+  //   path.resolve(__dirname, "tmp.txt"),
+  //   JSON.stringify(data.dataHy),
+  //   // @ts-ignore
+  //   function (err) {
+  //     if (err) {
+  //       return console.log(err);
+  //     }
+  //     console.log("The file was saved!");
+  //   }
+  // ); // Orfs.writeFileSync('/tmp/test-sync', 'Hey there!');
 };
 
 const test2D = () => {

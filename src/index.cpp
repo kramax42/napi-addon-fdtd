@@ -87,12 +87,12 @@ Napi::Value GetData1D(const Napi::CallbackInfo &info)
   std::vector<double> eps_vector;
   std::vector<double> mu_vector;
   std::vector<double> sigma_vector;
-  for (int i = 0; i < grid_size; i++)
-  {
-    eps_vector.push_back(0);
-    mu_vector.push_back(0);
-    sigma_vector.push_back(0);
-  }
+  // for (int i = 0; i < grid_size; i++)
+  // {
+  //   eps_vector.push_back(0);
+  //   mu_vector.push_back(0);
+  //   sigma_vector.push_back(0);
+  // }
 
   // Filling eps, mu, sigma vectors.
   for (int i = 0; i < material_vector_size; i++)
@@ -100,9 +100,13 @@ Napi::Value GetData1D(const Napi::CallbackInfo &info)
     for (int j = 0; j < coeff; j++)
     {
       int index = temp_vector[i];
-      eps_vector[i + j] = static_cast<double>(eps_js[index].As<Napi::Number>());
-      mu_vector[i + j] = static_cast<double>(mu_js[index].As<Napi::Number>());
-      sigma_vector[i + j] = static_cast<double>(sigma_js[index].As<Napi::Number>());
+      eps_vector.push_back(static_cast<double>(eps_js[index].As<Napi::Number>()));
+      mu_vector.push_back(static_cast<double>(mu_js[index].As<Napi::Number>()));
+      sigma_vector.push_back(static_cast<double>(sigma_js[index].As<Napi::Number>()));
+
+      // eps_vector[i + j] = static_cast<double>(eps_js[index].As<Napi::Number>());
+      // mu_vector[i + j] = static_cast<double>(mu_js[index].As<Napi::Number>());
+      // sigma_vector[i + j] = static_cast<double>(sigma_js[index].As<Napi::Number>());
     }
   }
 
