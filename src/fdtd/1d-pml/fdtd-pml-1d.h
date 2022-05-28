@@ -7,16 +7,6 @@
 #include <vector>
 #include <algorithm> // std::fill
 
-// void printArray(std::array<double> &arr)
-// {
-//     for(double& e : arr) 
-//     {
-//         std::cout << e << " ";
-//     }
-//     std::cout << std::endl;
-// }
-
-
 class FdtdPml1D
 {
 

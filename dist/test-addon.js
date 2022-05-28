@@ -38,7 +38,7 @@ var test2D = function () {
     var mu = [0.51, 0.5, 0.57];
     var sigma = [1.0, 0.001, 1.0];
     var returnDataNumber = 0;
-    var srcPosition = [0, 0];
+    var srcPosition = [0.1, 0.1];
     var reload = true;
     var data = index_1.default.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
     reload = false;
@@ -65,6 +65,14 @@ function testMemoryUsage() {
     var used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
-test1D();
-// test2D();
+// test1D();
+test2D();
 // testMemoryUsage();
+// void printArray(std::array<double> &arr)
+// {
+//     for(double& e : arr) 
+//     {
+//         std::cout << e << " ";
+//     }
+//     std::cout << std::endl;
+// }

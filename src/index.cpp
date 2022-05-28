@@ -279,12 +279,20 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info)
     }
   }
 
-  static FdtdPml2D fdtd = FdtdPml2D(eps_matrix, mu_matrix, sigma_matrix);
+  const Napi::Array src_position_array = info[8].As<Napi::Array>();
+  double relative_src_position_x = (float)src_position_array[(uint32_t)0].As<Napi::Number>();
+  double relative_src_position_y = (float)src_position_array[(uint32_t)1].As<Napi::Number>();
+  // double relative_src_position = static_cast<double>(info[7].As<Napi::Number>());
+  size_t src_position_row = static_cast<size_t>(relative_src_position_y * rows);
+  size_t src_position_col = static_cast<size_t>(relative_src_position_x * cols);
+
+
+  static FdtdPml2D fdtd = FdtdPml2D(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
 
   // (fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
   if (reload_check)
   {
-    fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix);
+    fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
   }
 
   std::vector<double> vect_X = {};

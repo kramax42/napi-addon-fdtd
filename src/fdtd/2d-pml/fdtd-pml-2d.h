@@ -101,9 +101,17 @@ public:
 
     void SetParams(std::vector<std::vector<double>>& eps,
               std::vector<std::vector<double>>& mu,
-              std::vector<std::vector<double>>& sigma)
+              std::vector<std::vector<double>>& sigma,
+              size_t new_src_position_row,
+              size_t new_src_position_col)
     {
         time_step = 0;
+
+        src_row = new_src_position_row + pml_width;
+        src_col = new_src_position_col + pml_width;
+
+        // std::cout << "row: " << src_row << std::endl;
+        // std::cout << "col: " << src_col << std::endl;
 
         // Init field arrays.
         std::fill_n(&dz[0][0], rows * cols, 0.0);
@@ -251,13 +259,10 @@ public:
 
     FdtdPml2D(std::vector<std::vector<double>> &eps,
               std::vector<std::vector<double>> &mu,
-              std::vector<std::vector<double>> &sigma) {
-        SetParams(eps, mu, sigma);
-        // for (int i = 1; i < 440; i++){
-        //     Calculation();
-        //     std::cout << ez[20][70] << std::endl;
-        //      time_step++;
-        // }
+              std::vector<std::vector<double>> &sigma,
+              size_t new_src_position_row,
+              size_t new_src_position_col) {
+        SetParams(eps, mu, sigma, new_src_position_row, new_src_position_col);
         
     }
 

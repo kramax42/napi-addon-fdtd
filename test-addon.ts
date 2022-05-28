@@ -46,7 +46,7 @@ const test2D = () => {
   const mu = [0.51, 0.5, 0.57];
   const sigma = [1.0, 0.001, 1.0];
   const returnDataNumber = 0;
-  const srcPosition = [0,0];
+  const srcPosition = [0.1,0.1];
 
   let reload = true;
   let data = addon.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
@@ -80,6 +80,17 @@ function testMemoryUsage() {
 }
 
 
-test1D();
-// test2D();
+// test1D();
+test2D();
 // testMemoryUsage();
+
+
+
+// void printArray(std::array<double> &arr)
+// {
+//     for(double& e : arr) 
+//     {
+//         std::cout << e << " ";
+//     }
+//     std::cout << std::endl;
+// }
