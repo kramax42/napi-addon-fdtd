@@ -1,4 +1,4 @@
-// Import addon wothout bindings package
+// Import addon without 'bindings' package
 // let addon = require("./build/Release/napi-addon-fdtd.node");
 
 import bindings from 'bindings';

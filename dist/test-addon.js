@@ -18,17 +18,6 @@ var test1D = function () {
         data = index_1.default.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
     }
     console.log(data);
-    // fs.writeFileSync(
-    //   path.resolve(__dirname, "tmp.txt"),
-    //   JSON.stringify(data.dataHy),
-    //   // @ts-ignore
-    //   function (err) {
-    //     if (err) {
-    //       return console.log(err);
-    //     }
-    //     console.log("The file was saved!");
-    //   }
-    // ); // Orfs.writeFileSync('/tmp/test-sync', 'Hey there!');
 };
 var test2D = function () {
     var condition = [1, 10];
@@ -46,33 +35,11 @@ var test2D = function () {
         data = index_1.default.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
     }
     console.log(data);
-    // fs.writeFileSync(
-    //   path.resolve(__dirname, "tmp.txt"),
-    //   JSON.stringify(data.dataY),
-    //    // @ts-ignore
-    //   function (err) {
-    //     if (err) {
-    //       return console.log(err);
-    //     }
-    //     console.log("The file was saved!");
-    //   }
-    // ); // Orfs.writeFileSync('/tmp/test-sync', 'Hey there!');
 };
 function testMemoryUsage() {
-    // const arr = [1, 2, 3, 4, 5, 6, 9, 7, 8, 9, 10];
-    // const arr = Array(1e7).fill(1e3);
-    // arr.reverse();
     var used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
 // test1D();
 test2D();
 // testMemoryUsage();
-// void printArray(std::array<double> &arr)
-// {
-//     for(double& e : arr) 
-//     {
-//         std::cout << e << " ";
-//     }
-//     std::cout << std::endl;
-// }
