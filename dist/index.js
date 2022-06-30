@@ -1,5 +1,6 @@
 "use strict";
-// var addon = require("./build/Release/napi-addon-fdtd.node");
+// Import addon wothout bindings package
+// let addon = require("./build/Release/napi-addon-fdtd.node");
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };

@@ -13,9 +13,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${CMAKE_JS_INC})
 
 # Declare the location of the source files
-file(GLOB SOURCE_FILES "src/*.cpp" "src/*.h"
-                       "src/fdtd/2d-pml/*.cpp" "src/fdtd/2d-pml/*.h"
-                       "src/fdtd/1d-pml/*.cpp" "src/fdtd/1d-pml/*.h"
+file(GLOB SOURCE_FILES "src/*.h" "src/*.cpp" 
+                       "src/fdtd/2d-pml/*.h" "src/fdtd/2d-pml/*.cpp" 
+                       "src/fdtd/1d-pml/*.h" "src/fdtd/1d-pml/*.cpp" 
                        )
 
 # This line will tell CMake that we're building a shared library
