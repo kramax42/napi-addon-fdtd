@@ -40,6 +40,6 @@ function testMemoryUsage() {
     var used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
-// test1D();
+test1D();
 test2D();
 // testMemoryUsage();
