@@ -18,7 +18,7 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info)
   // Reload params checker.
   bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
 
-  // Material------ matrix transformation JS -> C++.
+  // Material matrix transformation JS -> C++.
   const Napi::Array material_matrix_js = info[2].As<Napi::Array>();
   const Napi::Array eps_js = info[4].As<Napi::Array>();
   const Napi::Array mu_js = info[5].As<Napi::Array>();
@@ -81,11 +81,13 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info)
       {
         for (int f = 0; f < coeff; f++)
         {
-          // Rotate matrix on 90 degree for correctness in numerical method.
           int index = temp_matrix[i][j];
+
+          // Rotate matrix on 90 degree for correctness in numerical method.
           // eps_matrix[j * coeff + f][i * coeff + k] = static_cast<double>(eps_js[index].As<Napi::Number>());
           // mu_matrix[j * coeff + f][i * coeff + k] = static_cast<double>(mu_js[index].As<Napi::Number>());
           // sigma_matrix[j * coeff + f][i * coeff + k] = static_cast<double>(sigma_js[index].As<Napi::Number>());
+
           // Without rotate.
           eps_matrix[i * coeff + k][j * coeff + f] = static_cast<double>(eps_js[index].As<Napi::Number>());
           mu_matrix[i * coeff + k][j * coeff + f] = static_cast<double>(mu_js[index].As<Napi::Number>());
@@ -101,7 +103,6 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info)
   // double relative_src_position = static_cast<double>(info[7].As<Napi::Number>());
   size_t src_position_row = static_cast<size_t>(relative_src_position_y * rows);
   size_t src_position_col = static_cast<size_t>(relative_src_position_x * cols);
-
 
   static FdtdPml2D fdtd = FdtdPml2D(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
 
@@ -160,25 +161,21 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info)
   {
   case 0:
     data.Set("dataEz", js_data_Ez);
-
     // max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
     // min = *std::min_element(std::begin(vect_Ez), std::end(vect_Ez));
     break;
   case 1:
     data.Set("dataHy", js_data_Hy);
-
     // max = *std::max_element(std::begin(vect_Hy), std::end(vect_Hy));
     // min = *std::min_element(std::begin(vect_Hy), std::end(vect_Hy));
     break;
   case 2:
     data.Set("dataHx", js_data_Hx);
-
     // max = *std::max_element(std::begin(vect_Hx), std::end(vect_Hx));
     // min = *std::min_element(std::begin(vect_Hx), std::end(vect_Hx));
     break;
   case 3:
     data.Set("dataEnergy", js_data_Energy);
-
     // max = *std::max_element(std::begin(vect_Energy), std::end(vect_Energy));
     // min = *std::min_element(std::begin(vect_Energy), std::end(vect_Energy));
     break;
