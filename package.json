@@ -9,7 +9,6 @@
     "test": "npm install && tsc && node dist/test-addon.js"
   },
   "keywords": [],
-  "author": "maxmaxkklosd99<pepetrov123@list.ru>",
   "license": "ISC",
   "dependencies": {
     "bindings": "^1.5.0",

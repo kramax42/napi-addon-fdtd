@@ -1,9 +1,9 @@
 #ifndef GET_DATA_1D
 #define GET_DATA_1D
 
-
 #include <math.h>
 #include <napi.h>
+
 #include <iostream>
 #include <string>
 #include <vector>
