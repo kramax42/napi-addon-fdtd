@@ -12,10 +12,10 @@ var test1D = function () {
     var sigma = [1.0, 0.001, 1.0];
     var srcPosition = [0.5];
     var reload = true;
-    var data = index_1.default.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
-    reload = false;
-    for (var j = 0; j < 5; ++j) {
-        data = index_1.default.getData1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+    var fdtd = new index_1.default.Fdtd1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+    var data;
+    for (var j = 0; j < 49; ++j) {
+        data = fdtd.getNextTimeLayer();
     }
     console.log(data);
 };
@@ -41,5 +41,5 @@ function testMemoryUsage() {
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
 test1D();
-test2D();
+// test2D();
 // testMemoryUsage();

@@ -99,6 +99,14 @@ void FdtdPml1D::Calculation(std::vector<double> &vect_x,
     ++time_step;
 }
 
+
+    FdtdPml1D::FdtdPml1D()
+{
+
+    // SetParams(new_tau, new_omega, new_eps,
+    //           new_mu, new_sigma, new_src_position);
+}
+
 FdtdPml1D::FdtdPml1D(double new_tau,
                      double new_omega,
                      std::vector<double> &new_eps,

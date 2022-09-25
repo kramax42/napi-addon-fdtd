@@ -4,13 +4,11 @@
 #include <math.h>
 #include <napi.h>
 
+#include <algorithm>  // std::fill
 #include <iostream>
 #include <vector>
-#include <algorithm> // std::fill
 
-class FdtdPml1D
-{
-
+class FdtdPml1D {
     // Speed of light in nm/fs.
     const double light_spd = 299.792458;
 
@@ -88,7 +86,7 @@ class FdtdPml1D
 
     size_t time_step = 0;
 
-public:
+   public:
     void SetParams(double new_tau,
                    double new_omega,
                    std::vector<double> &new_eps,
@@ -100,8 +98,7 @@ public:
     size_t GetCurrentTimeStep();
     double GetTau();
     size_t GetSourcePosition();
-    static size_t GetGridSize()
-    {
+    static size_t GetGridSize() {
         // return grid_size - pml_width * 2;
         return grid_size;
     }
@@ -109,6 +106,8 @@ public:
     void Calculation(std::vector<double> &vect_x,
                      std::vector<double> &vect_ex,
                      std::vector<double> &vect_hy);
+
+    FdtdPml1D();
 
     FdtdPml1D(double new_tau,
               double new_omega,

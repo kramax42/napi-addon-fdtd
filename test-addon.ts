@@ -9,29 +9,19 @@ const test1D = () => {
   const srcPosition = [0.5];
 
   let reload = true;
-  let data = addon.getData1D(
-    condition,
+
+  let fdtd = new addon.Fdtd1D(condition,
     reload,
     materialVector,
     materialVector.length,
     eps,
     mu,
     sigma,
-    srcPosition
-  );
+    srcPosition);
 
-  reload = false;
-  for (let j = 0; j < 5; ++j) {
-    data = addon.getData1D(
-      condition,
-      reload,
-      materialVector,
-      materialVector.length,
-      eps,
-      mu,
-      sigma,
-      srcPosition
-    );
+  let data;
+  for (let j = 0; j < 49; ++j) {
+    data = fdtd.getNextTimeLayer();
   }
   console.log(data);
 };
@@ -85,5 +75,5 @@ function testMemoryUsage() {
 }
 
 test1D();
-test2D();
+// test2D();
 // testMemoryUsage();
