@@ -29,10 +29,11 @@ var test2D = function () {
     var returnDataNumber = 0;
     var srcPosition = [0.1, 0.1];
     var reload = true;
-    var data = index_1.default.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
-    reload = false;
-    for (var j = 0; j < 50; ++j) {
-        data = index_1.default.getData2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
+    console.log(index_1.default);
+    var fdtd = new index_1.default.Fdtd2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
+    var data;
+    for (var j = 0; j < 49; ++j) {
+        data = fdtd.getNextTimeLayer();
     }
     console.log(data);
 };
@@ -40,6 +41,6 @@ function testMemoryUsage() {
     var used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
-test1D();
-// test2D();
+// test1D();
+test2D();
 // testMemoryUsage();

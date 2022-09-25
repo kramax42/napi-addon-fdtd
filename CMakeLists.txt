@@ -16,9 +16,8 @@ include_directories(${CMAKE_JS_INC})
 file(GLOB SOURCE_FILES "src/*.h" "src/*.cpp" 
                        "src/fdtd/2d-pml/*.h" "src/fdtd/2d-pml/*.cpp" 
                        "src/fdtd/1d-pml/*.h" "src/fdtd/1d-pml/*.cpp" 
-                       "src/transform-to-js/get-data-1d/*.h" "src/transform-to-js/get-data-1d/*.cpp" 
-                       "src/transform-to-js/get-data-2d/*.h" "src/transform-to-js/get-data-2d/*.cpp" 
-                       
+                       "src/transform-to-js/fdtd-1d/*.h" "src/transform-to-js/fdtd-1d/*.cpp" 
+                       "src/transform-to-js/fdtd-2d/*.h" "src/transform-to-js/fdtd-2d/*.cpp"                        
                        )
 
 # This line will tell CMake that we're building a shared library

@@ -10,12 +10,10 @@
 #include <math.h>
 #include <napi.h>
 
+#include <algorithm>  // std::fill_n
 #include <vector>
-#include <algorithm> // std::fill_n
 
-class FdtdPml2D
-{
-
+class FdtdPml2D {
     // Grid sizes.
     static const size_t pml_width = 40;
 
@@ -87,15 +85,13 @@ class FdtdPml2D
     double fj2[rows];
     double fj3[rows];
 
-public:
+   public:
     // Getters.
-    static size_t GetRows()
-    {
+    static size_t GetRows() {
         return rows - pml_width * 2;
     }
 
-    static size_t GetCols()
-    {
+    static size_t GetCols() {
         return cols - pml_width * 2;
     }
 
@@ -109,6 +105,8 @@ public:
                    size_t new_src_position_col);
 
     void Calculation();
+
+    FdtdPml2D();
 
     FdtdPml2D(std::vector<std::vector<double>> &eps,
               std::vector<std::vector<double>> &mu,

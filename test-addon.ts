@@ -37,7 +37,10 @@ const test2D = () => {
   const srcPosition = [0.1, 0.1];
 
   let reload = true;
-  let data = addon.getData2D(
+
+  console.log(addon)
+
+  let fdtd = new addon.Fdtd2D(
     condition,
     reload,
     materialMatrix,
@@ -46,24 +49,12 @@ const test2D = () => {
     mu,
     sigma,
     returnDataNumber,
-    srcPosition
-  );
+    srcPosition);
 
-  reload = false;
-  for (let j = 0; j < 50; ++j) {
-    data = addon.getData2D(
-      condition,
-      reload,
-      materialMatrix,
-      matrixSize,
-      eps,
-      mu,
-      sigma,
-      returnDataNumber,
-      srcPosition
-    );
+  let data;
+  for (let j = 0; j < 49; ++j) {
+    data = fdtd.getNextTimeLayer();
   }
-
   console.log(data);
 };
 
@@ -74,6 +65,6 @@ function testMemoryUsage() {
   );
 }
 
-test1D();
+// test1D();
 // test2D();
 // testMemoryUsage();

@@ -4,8 +4,7 @@ void FdtdPml2D::SetParams(std::vector<std::vector<double>> &eps,
                           std::vector<std::vector<double>> &mu,
                           std::vector<std::vector<double>> &sigma,
                           size_t new_src_position_row,
-                          size_t new_src_position_col)
-{
+                          size_t new_src_position_col) {
     time_step = 0;
 
     src_row = new_src_position_row + pml_width;
@@ -32,8 +31,7 @@ void FdtdPml2D::SetParams(std::vector<std::vector<double>> &eps,
     std::fill_n(&fj3[0], rows, 1.0);
 
     // Fill pml arrays.
-    for (size_t i = 0; i < pml_width; ++i)
-    {
+    for (size_t i = 0; i < pml_width; ++i) {
         int xnum = pml_width - i;
         double xd = pml_width;
         double xxn = xnum / xd;
@@ -68,17 +66,11 @@ void FdtdPml2D::SetParams(std::vector<std::vector<double>> &eps,
     }
 
     // Fill medium array.
-    for (size_t i = 0; i < rows; ++i)
-    {
-        for (size_t j = 0; j < cols; ++j)
-        {
-
-            if (i > pml_width && i < (rows - pml_width) && j > pml_width && j < (cols - pml_width))
-            {
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            if (i > pml_width && i < (rows - pml_width) && j > pml_width && j < (cols - pml_width)) {
                 gaz[i][j] = 1.0 / (eps[i - pml_width][j - pml_width] + (sigma[i - pml_width][j - pml_width] * dt) / epsz);
-            }
-            else
-            {
+            } else {
                 gaz[i][j] = 1.0 / (epsilon1 + (sigma1 * dt) / epsz);
             }
 
@@ -104,23 +96,17 @@ void FdtdPml2D::SetParams(std::vector<std::vector<double>> &eps,
 }
 
 // One time layer calculation.
-void FdtdPml2D::Calculation()
-{
-
+void FdtdPml2D::Calculation() {
     // Dz field calculation.
-    for (int i = 1; i < rows; i++)
-    {
-        for (int j = 1; j < cols; j++)
-        {
+    for (int i = 1; i < rows; i++) {
+        for (int j = 1; j < cols; j++) {
             dz[i][j] = gi3[i] * gj3[j] * dz[i][j] + gi2[i] * gj2[j] * 0.5 * (hy[i][j] - hy[i - 1][j] - hx[i][j] + hx[i][j - 1]);
         }
     }
 
     // Ez field calculation.
-    for (int i = 1; i < rows; i++)
-    {
-        for (int j = 1; j < cols; j++)
-        {
+    for (int i = 1; i < rows; i++) {
+        for (int j = 1; j < cols; j++) {
             ez[i][j] = gaz[i][j] * dz[i][j];
         }
     }
@@ -129,11 +115,8 @@ void FdtdPml2D::Calculation()
     double source = -2.0 * ((time_step - t0) / tau) * std::exp(-1.0 * std::pow((time_step - t0) / tau, 2));
     ez[src_row][src_col] = source;
 
-    for (int i = 0; i < rows - 1; i++)
-    {
-        for (int j = 0; j < cols - 1; j++)
-        {
-
+    for (int i = 0; i < rows - 1; i++) {
+        for (int j = 0; j < cols - 1; j++) {
             // Hx field calculation.
             hx[i][j] = fj3[j] * hx[i][j] + fj2[j] * 0.5 * (ez[i][j] - ez[i][j + 1]);
             // Hy field calculation.
@@ -142,22 +125,21 @@ void FdtdPml2D::Calculation()
     }
 }
 
-size_t FdtdPml2D::GetStep()
-{
+size_t FdtdPml2D::GetStep() {
     return 1;
 }
 
-size_t FdtdPml2D::GetCurrentTimeStep()
-{
+size_t FdtdPml2D::GetCurrentTimeStep() {
     return time_step;
 }
+
+FdtdPml2D::FdtdPml2D() {}
 
 FdtdPml2D::FdtdPml2D(std::vector<std::vector<double>> &eps,
                      std::vector<std::vector<double>> &mu,
                      std::vector<std::vector<double>> &sigma,
                      size_t new_src_position_row,
-                     size_t new_src_position_col)
-{
+                     size_t new_src_position_col) {
     SetParams(eps, mu, sigma, new_src_position_row, new_src_position_col);
 }
 
@@ -167,21 +149,17 @@ void FdtdPml2D::CalcNextLayer(std::vector<double> &vectX,
                               std::vector<double> &vectHy,
                               std::vector<double> &vectHx,
                               std::vector<double> &vectEnergy,
-                              double &max, double &min)
-{
-
+                              double &max, double &min) {
     Calculation();
 
     size_t step = GetStep();
 
     // for (int xx = 1; xx < rows - 1; xx += step)
-    for (int xx = pml_width; xx < rows - pml_width; xx += step)
-    {
+    for (int xx = pml_width; xx < rows - pml_width; xx += step) {
         // vectX.push_back(xx);
         // vectY.push_back(xx);
         // for (int yy = 1; yy < cols - 1; yy += step)
-        for (int yy = pml_width; yy < cols - pml_width; yy += step)
-        {
+        for (int yy = pml_width; yy < cols - pml_width; yy += step) {
             // Energy
             // double energy = yy1[xx][yy] * yy1[xx][yy] * Ez1[xx][yy] * Ez1[xx][yy] +
             // Hy1[xx][yy] * Hy1[xx][yy] + Hx1[xx][yy] * Hx1[xx][yy];
@@ -194,14 +172,11 @@ void FdtdPml2D::CalcNextLayer(std::vector<double> &vectX,
             vectHx.push_back(hx[yy][xx]);
             vectEnergy.push_back(energy);
 
-            if (xx > (pml_width + 10) && xx < (rows - pml_width - 10) && yy > (pml_width + 10) && yy < (rows - pml_width - 10))
-            {
-                if (ez[yy][xx] > max)
-                {
+            if (xx > (pml_width + 10) && xx < (rows - pml_width - 10) && yy > (pml_width + 10) && yy < (rows - pml_width - 10)) {
+                if (ez[yy][xx] > max) {
                     max = ez[yy][xx];
                 }
-                if (ez[yy][xx] < min)
-                {
+                if (ez[yy][xx] < min) {
                     min = ez[yy][xx];
                 }
             }

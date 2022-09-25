@@ -1,6 +1,37 @@
-#include "./get-data-2d.h"
+#include "fdtd-2d.h"
 
-Napi::Value GetData2D(const Napi::CallbackInfo &info) {
+Napi::Object Fdtd2D::Init(Napi::Env env, Napi::Object exports) {
+    // This method is used to hook the accessor and method callbacks.
+    Napi::Function func =
+        DefineClass(env,
+                    "Fdtd2D",
+                    {
+                        InstanceMethod("getNextTimeLayer", &Fdtd2D::GetNextTimeLayer),
+                    });
+
+    Napi::FunctionReference* constructor = new Napi::FunctionReference();
+
+    // Create a persistent reference to the class constructor. This will allow
+    // a function called on a class prototype and a function
+    // called on instance of a class to be distinguished from each other.
+    *constructor = Napi::Persistent(func);
+    exports.Set("Fdtd2D", func);
+
+    // Store the constructor as the add-on instance data. This will allow this
+    // add-on to support multiple instances of itself running on multiple worker
+    // threads, as well as multiple instances of itself running in different
+    // contexts on the same thread.
+    //
+    // By default, the value set on the environment here will be destroyed when
+    // the add-on is unloaded using the `delete` operator, but it is also
+    // possible to supply a custom deleter.
+    env.SetInstanceData(constructor);
+
+    return exports;
+}
+
+Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
+    : Napi::ObjectWrap<Fdtd2D>(info), fdtd() {
     Napi::Env env = info.Env();
 
     // 0 - conditions - [lambda, beamsize]
@@ -12,6 +43,12 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
     // 6 - sigma array.
     // 7 - data return type(number)   ('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
     // 8 - relative source position array.
+
+    if (info.Length() <= 0 || info.Length() > 9) {
+        Napi::TypeError::New(env, "Wrong arguments amount!").ThrowAsJavaScriptException();
+        return;
+    }
+
     const Napi::Array input_array_condition = info[0].As<Napi::Array>();
 
     // Reload params checker.
@@ -31,6 +68,7 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
 
     // Data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
     int data_return_type = static_cast<int>(info[7].As<Napi::Number>());
+    this->data_return_type = data_return_type;
 
     // Params transformation JS -> C++.
     double lambda = (double)input_array_condition[(uint32_t)0].As<Napi::Number>();
@@ -95,12 +133,12 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
     size_t src_position_row = static_cast<size_t>(relative_src_position_y * rows);
     size_t src_position_col = static_cast<size_t>(relative_src_position_x * cols);
 
-    static FdtdPml2D fdtd = FdtdPml2D(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
+    fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
+}
 
-    // (fdtd_3D.getLambda() != lambda) || (fdtd_3D.getBeamsize() != beamsize) ||
-    if (reload_check) {
-        fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
-    }
+// Fdtd method in 1D case.
+Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
 
     std::vector<double> vect_X = {};
     std::vector<double> vect_Y = {};
@@ -112,7 +150,10 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
     double max = 0.001;
     double min = -0.001;
 
-    fdtd.CalcNextLayer(vect_X, vect_Y, vect_Ez, vect_Hy, vect_Hx, vect_Energy, max, min);
+    this->fdtd.CalcNextLayer(vect_X, vect_Y, vect_Ez, vect_Hy, vect_Hx, vect_Energy, max, min);
+
+    const size_t rows = FdtdPml2D::GetRows();
+    const size_t cols = FdtdPml2D::GetCols();
 
     // Matrix sizes.
     size_t client_rows = rows / fdtd.GetStep();
@@ -146,7 +187,7 @@ Napi::Value GetData2D(const Napi::CallbackInfo &info) {
     data.Set("cols", client_cols);
     data.Set("timeStep", fdtd.GetCurrentTimeStep());
 
-    switch (data_return_type) {
+    switch (this->data_return_type) {
         case 0:
             data.Set("dataEz", js_data_Ez);
             // max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
