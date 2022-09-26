@@ -1,23 +1,27 @@
 import addon from "./index";
 
 const test1D = () => {
-  const condition = [3.5, 8];
+  const omega = 3.5;
+  const tau = 8;
   const materialVector = [1, 0, 2, 0, 1];
   const eps = [1.0, 1.2, 1.1];
   const mu = [0.51, 0.5, 0.57];
   const sigma = [1.0, 0.001, 1.0];
   const srcPosition = [0.5];
 
-  let reload = true;
+  const isReload = true;
 
-  let fdtd = new addon.Fdtd1D(condition,
-    reload,
+  let fdtd = new addon.Fdtd1D({
+    omega,
+    tau,
+    isReload,
     materialVector,
-    materialVector.length,
     eps,
     mu,
     sigma,
-    srcPosition);
+    srcPosition
+  });
+
 
   let data;
   for (let j = 0; j < 49; ++j) {
@@ -65,6 +69,6 @@ function testMemoryUsage() {
   );
 }
 
-// test1D();
+test1D();
 // test2D();
 // testMemoryUsage();

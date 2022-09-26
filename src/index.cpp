@@ -7,7 +7,8 @@
 
 // Callback method when module is registered with Node.js.
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
-    Napi::Object new_exports = Fdtd1D::Init(env, exports);
+    Napi::Object new_exports = exports;
+    new_exports = Fdtd1D::Init(env, new_exports);
     new_exports = Fdtd2D::Init(env, new_exports);
     return Fdtd1D::Init(env, new_exports);
 }

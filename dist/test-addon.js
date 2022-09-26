@@ -5,14 +5,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = __importDefault(require("./index"));
 var test1D = function () {
-    var condition = [3.5, 8];
+    var omega = 3.5;
+    var tau = 8;
     var materialVector = [1, 0, 2, 0, 1];
     var eps = [1.0, 1.2, 1.1];
     var mu = [0.51, 0.5, 0.57];
     var sigma = [1.0, 0.001, 1.0];
     var srcPosition = [0.5];
-    var reload = true;
-    var fdtd = new index_1.default.Fdtd1D(condition, reload, materialVector, materialVector.length, eps, mu, sigma, srcPosition);
+    var isReload = true;
+    var fdtd = new index_1.default.Fdtd1D({
+        omega: omega,
+        tau: tau,
+        isReload: isReload,
+        materialVector: materialVector,
+        eps: eps,
+        mu: mu,
+        sigma: sigma,
+        srcPosition: srcPosition
+    });
     var data;
     for (var j = 0; j < 49; ++j) {
         data = fdtd.getNextTimeLayer();
@@ -41,6 +51,6 @@ function testMemoryUsage() {
     var used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
-// test1D();
-test2D();
+test1D();
+// test2D();
 // testMemoryUsage();
