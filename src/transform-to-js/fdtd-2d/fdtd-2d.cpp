@@ -39,23 +39,13 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     //   lambda,
     //   beamsize,
     //   isReload,
-    //   materialVector,
+    //   materialVector, // material matrix(flatten)
     //   eps,
     //   mu,
     //   sigma,
-    //   dataReturnType,
+    //   dataReturnType, // ('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
     //   srcPosition
     // }
-
-    // 0 - conditions - [lambda, beamsize]
-    // 1 - reload checker.
-    // 2 - material matrix(flatten).
-    // 3 - rows (material matrix size). rows x rows
-    // 4 - epsilon array.
-    // 5 - mu array.
-    // 6 - sigma array.
-    // 7 - data return type(number)   ('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
-    // 8 - relative source position array.
 
     if (info.Length() != 1) {
         Napi::TypeError::New(env, "Wrong number of arguments")
@@ -230,7 +220,7 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     const Napi::Array src_position_array = argObj.Get("srcPosition").As<Napi::Array>();
     double relative_src_position_x = (float)src_position_array[(uint32_t)0].As<Napi::Number>();
     double relative_src_position_y = (float)src_position_array[(uint32_t)1].As<Napi::Number>();
-    // double relative_src_position = static_cast<double>(info[7].As<Napi::Number>());
+
     size_t src_position_row = static_cast<size_t>(relative_src_position_y * rows);
     size_t src_position_col = static_cast<size_t>(relative_src_position_x * cols);
 
