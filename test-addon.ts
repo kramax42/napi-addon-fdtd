@@ -31,29 +31,27 @@ const test1D = () => {
 };
 
 const test2D = () => {
-  const condition = [1, 10];
-  const materialMatrix = [1, 0, 2, 0];
-  const matrixSize = 2;
+  const lambda = 1;
+  const beamsize = 1;
+  const materialVector = [1, 0, 2, 0];
   const eps = [1.0, 1.2, 1.1];
   const mu = [0.51, 0.5, 0.57];
   const sigma = [1.0, 0.001, 1.0];
-  const returnDataNumber = 0;
   const srcPosition = [0.1, 0.1];
+  const dataReturnType = 0;
+  let isReload = true;
 
-  let reload = true;
-
-  console.log(addon)
-
-  let fdtd = new addon.Fdtd2D(
-    condition,
-    reload,
-    materialMatrix,
-    matrixSize,
+  let fdtd = new addon.Fdtd2D({
+    lambda,
+    beamsize,
+    isReload,
+    materialVector,
     eps,
     mu,
     sigma,
-    returnDataNumber,
-    srcPosition);
+    dataReturnType,
+    srcPosition
+  });
 
   let data;
   for (let j = 0; j < 49; ++j) {
@@ -69,6 +67,9 @@ function testMemoryUsage() {
   );
 }
 
+
 test1D();
 // test2D();
+
+
 // testMemoryUsage();

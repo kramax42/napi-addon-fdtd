@@ -30,17 +30,26 @@ var test1D = function () {
     console.log(data);
 };
 var test2D = function () {
-    var condition = [1, 10];
-    var materialMatrix = [1, 0, 2, 0];
-    var matrixSize = 2;
+    var lambda = 1;
+    var beamsize = 1;
+    var materialVector = [1, 0, 2, 0];
     var eps = [1.0, 1.2, 1.1];
     var mu = [0.51, 0.5, 0.57];
     var sigma = [1.0, 0.001, 1.0];
-    var returnDataNumber = 0;
     var srcPosition = [0.1, 0.1];
-    var reload = true;
-    console.log(index_1.default);
-    var fdtd = new index_1.default.Fdtd2D(condition, reload, materialMatrix, matrixSize, eps, mu, sigma, returnDataNumber, srcPosition);
+    var dataReturnType = 0;
+    var isReload = true;
+    var fdtd = new index_1.default.Fdtd2D({
+        lambda: lambda,
+        beamsize: beamsize,
+        isReload: isReload,
+        materialVector: materialVector,
+        eps: eps,
+        mu: mu,
+        sigma: sigma,
+        dataReturnType: dataReturnType,
+        srcPosition: srcPosition
+    });
     var data;
     for (var j = 0; j < 49; ++j) {
         data = fdtd.getNextTimeLayer();

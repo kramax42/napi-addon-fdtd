@@ -34,6 +34,19 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<Fdtd2D>(info), fdtd() {
     Napi::Env env = info.Env();
 
+    // Object argument:
+    // {
+    //   lambda,
+    //   beamsize,
+    //   isReload,
+    //   materialVector,
+    //   eps,
+    //   mu,
+    //   sigma,
+    //   dataReturnType,
+    //   srcPosition
+    // }
+
     // 0 - conditions - [lambda, beamsize]
     // 1 - reload checker.
     // 2 - material matrix(flatten).
@@ -44,35 +57,113 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     // 7 - data return type(number)   ('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
     // 8 - relative source position array.
 
-    if (info.Length() <= 0 || info.Length() > 9) {
-        Napi::TypeError::New(env, "Wrong arguments amount!").ThrowAsJavaScriptException();
+    if (info.Length() != 1) {
+        Napi::TypeError::New(env, "Wrong number of arguments")
+            .ThrowAsJavaScriptException();
         return;
     }
 
-    const Napi::Array input_array_condition = info[0].As<Napi::Array>();
+    if (!info[0].IsObject()) {
+        Napi::TypeError::New(env, "Wrong argument! Should be an object.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+
+    Napi::Object argObj = info[0].As<Napi::Object>().ToObject();
+
+    // lambda
+    if (!argObj.Has("lambda") || !argObj.Get("lambda").IsNumber()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'lambda' property and it should be number.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+    double lambda = (double)argObj.Get("lambda").As<Napi::Number>();
+
+    // beamsize
+    if (!argObj.Has("beamsize") || !argObj.Get("beamsize").IsNumber()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'beamsize' property and it should be number.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+    double beamsize = (double)argObj.Get("beamsize").As<Napi::Number>();
 
     // Reload params checker.
-    bool reload_check = static_cast<bool>(info[1].As<Napi::Boolean>());
+    if (!argObj.Has("isReload") || !argObj.Get("isReload").IsBoolean()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'isReload' property and it should be boolean.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+    bool reload_check = static_cast<bool>(argObj.Get("isReload").As<Napi::Boolean>());
+
+    // Material matrix(flatten).
+    if (!argObj.Has("materialVector") || !argObj.Get("materialVector").IsArray()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'materialVector' property and it should be array.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
 
     // Material matrix transformation JS -> C++.
-    const Napi::Array material_matrix_js = info[2].As<Napi::Array>();
-    const Napi::Array eps_js = info[4].As<Napi::Array>();
-    const Napi::Array mu_js = info[5].As<Napi::Array>();
-    const Napi::Array sigma_js = info[6].As<Napi::Array>();
+    const Napi::Array material_matrix_js = argObj.Get("materialVector").As<Napi::Array>();
+    int material_matrix_size = material_matrix_js.Length() / 2;
 
-    // Must be even.
-    int material_matrix_size = static_cast<int>(info[3].As<Napi::Number>());
+    // Eps vector.
+    if (!argObj.Has("eps") || !argObj.Get("eps").IsArray()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'eps' property and it should be array.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+
+    // eps transformation JS -> C++.
+    const Napi::Array eps_js = argObj.Get("eps").As<Napi::Array>();
+
+    // mu vector.
+    if (!argObj.Has("mu") || !argObj.Get("mu").IsArray()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'mu' property and it should be array.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+
+    // mu transformation JS -> C++.
+    const Napi::Array mu_js = argObj.Get("mu").As<Napi::Array>();
+
+    // sigma vector.
+    if (!argObj.Has("sigma") || !argObj.Get("sigma").IsArray()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'sigma' property and it should be array.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+
+    // sigma transformation JS -> C++.
+    const Napi::Array sigma_js = argObj.Get("sigma").As<Napi::Array>();
 
     // Temporary matrix.
     std::vector<std::vector<int>> temp_matrix;
 
     // Data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
-    int data_return_type = static_cast<int>(info[7].As<Napi::Number>());
-    this->data_return_type = data_return_type;
+    if (!argObj.Has("dataReturnType") || !argObj.Get("dataReturnType").IsNumber()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'dataReturnType' property and it should be number(integer).")
+            .ThrowAsJavaScriptException();
+        return;
+    }
 
-    // Params transformation JS -> C++.
-    double lambda = (double)input_array_condition[(uint32_t)0].As<Napi::Number>();
-    double beamsize = (double)input_array_condition[1].As<Napi::Number>();
+    int data_return_type = static_cast<int>(argObj.Get("dataReturnType").As<Napi::Number>());
+    this->data_return_type = data_return_type;
 
     // Transform input flatten matrix into 2-dimensional matrix.
     for (int i = 0; i < material_matrix_size; i++) {
@@ -126,7 +217,17 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
         }
     }
 
-    const Napi::Array src_position_array = info[8].As<Napi::Array>();
+    // srcPositionArray.
+    if (!argObj.Has("srcPosition") || !argObj.Get("srcPosition").IsArray()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'srcPosition' property and it should be array.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+
+    // srcPosition transformation JS -> C++.
+    const Napi::Array src_position_array = argObj.Get("srcPosition").As<Napi::Array>();
     double relative_src_position_x = (float)src_position_array[(uint32_t)0].As<Napi::Number>();
     double relative_src_position_y = (float)src_position_array[(uint32_t)1].As<Napi::Number>();
     // double relative_src_position = static_cast<double>(info[7].As<Napi::Number>());
