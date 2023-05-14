@@ -41,7 +41,70 @@ type GetData1D = (
   //   export default function(string: 'hello'): Module;
   // }
 
+
+  type Fdtd1dOptions = {
+    omega: number;
+    tau: number;
+    isReload: boolean;
+    materialVector: number[];
+    eps: number[];
+    mu: number[];
+    sigma: number[];
+    srcPosition: number[];
+  };
+
+  type Fdtd1dOutput = {
+    max: number;
+    min: number;
+    dataX: number[];
+    dataY: number[];
+  };
+
+  type Fdtd2dOptions = {
+    lambda: number;
+    beamsize: number;
+    isReload: boolean;
+    materialVector: number[];
+    eps: number[];
+    mu: number[];
+    sigma: number[];
+    dataReturnType: number;
+    srcPosition: number[];
+  };
+
+  type Fdtd2dOutput = {
+    max: number;
+    min: number;
+    dataX: number[];
+    dataY: number[];
+    rows: number;
+    cols: number;  
+    timestep: number;  
+    dataEz?: number[];
+    dataHx?: number[];
+    dataHy?: number[];
+    dataEnergy?: number[];
+  };
+
   declare module 'napi-addon-fdtd' {
-    export const getData2D: GetData2D;
-    export const getData1D: GetData1D;
+    // export const getData2D: GetData2D;
+    // export const getData1D: GetData1D;
+    class Fdtd1D {
+      constructor(options: Fdtd1dOptions);
+      getNextTimeLayer(): Fdtd1dOutput;
+    }
+
+    class Fdtd2D {
+      constructor(options: Fdtd2dOptions);
+      getNextTimeLayer(): Fdtd2dOutput;
+    }
+
+    class Fdtd2DTFSF {
+      constructor();
+      getNextTimeLayer(): Fdtd2dOutput;
+    }
+    
   }
+
+
+  

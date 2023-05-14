@@ -33,7 +33,7 @@ const test1D = () => {
 const test2D = () => {
   const lambda = 1;
   const beamsize = 1;
-  const materialVector = [1, 0, 2, 0];
+  const materialVector = [1, 0, 2, 0, 1, 1, 1,1 ,1];
   const eps = [1.0, 1.2, 1.1];
   const mu = [0.51, 0.5, 0.57];
   const sigma = [1.0, 0.001, 1.0];
@@ -54,7 +54,7 @@ const test2D = () => {
   });
 
   let data;
-  for (let j = 0; j < 49; ++j) {
+  for (let j = 0; j < 300; ++j) {
     data = fdtd.getNextTimeLayer();
   }
   console.log(data);
@@ -68,6 +68,22 @@ function testMemoryUsage() {
 }
 
 
-test1D();
-// test2D();
+const test2DTFSF = () => {
+  
+
+  let fdtd = new addon.Fdtd2DTFSF();
+
+  let data;
+  for (let j = 0; j < 30; ++j) {
+    data = fdtd.getNextTimeLayer();
+  }
+  // console.log(fdtd);
+  console.log(data);
+};
+
+
+// test1D();
+test2D();
+
+// test2DTFSF();
 // testMemoryUsage();

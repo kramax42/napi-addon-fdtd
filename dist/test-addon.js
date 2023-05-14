@@ -32,7 +32,7 @@ var test1D = function () {
 var test2D = function () {
     var lambda = 1;
     var beamsize = 1;
-    var materialVector = [1, 0, 2, 0];
+    var materialVector = [1, 0, 2, 0, 1, 1, 1, 1, 1];
     var eps = [1.0, 1.2, 1.1];
     var mu = [0.51, 0.5, 0.57];
     var sigma = [1.0, 0.001, 1.0];
@@ -51,7 +51,7 @@ var test2D = function () {
         srcPosition: srcPosition
     });
     var data;
-    for (var j = 0; j < 49; ++j) {
+    for (var j = 0; j < 300; ++j) {
         data = fdtd.getNextTimeLayer();
     }
     console.log(data);
@@ -60,6 +60,16 @@ function testMemoryUsage() {
     var used = process.memoryUsage().heapUsed / 1024 / 1024;
     console.log("The script uses approximately ".concat(Math.round(used * 100) / 100, " MB"));
 }
-test1D();
-// test2D();
+var test2DTFSF = function () {
+    var fdtd = new index_1.default.Fdtd2DTFSF();
+    var data;
+    for (var j = 0; j < 30; ++j) {
+        data = fdtd.getNextTimeLayer();
+    }
+    // console.log(fdtd);
+    console.log(data);
+};
+// test1D();
+test2D();
+// test2DTFSF();
 // testMemoryUsage();

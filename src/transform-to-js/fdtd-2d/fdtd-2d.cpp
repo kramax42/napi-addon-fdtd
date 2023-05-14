@@ -1,3 +1,5 @@
+#include <iostream> 
+#include <cmath>
 #include "fdtd-2d.h"
 
 Napi::Object Fdtd2D::Init(Napi::Env env, Napi::Object exports) {
@@ -102,7 +104,7 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
 
     // Material matrix transformation JS -> C++.
     const Napi::Array material_matrix_js = argObj.Get("materialVector").As<Napi::Array>();
-    int material_matrix_size = material_matrix_js.Length() / 2;
+    int material_matrix_size = std::sqrt(material_matrix_js.Length());
 
     // Eps vector.
     if (!argObj.Has("eps") || !argObj.Get("eps").IsArray()) {
@@ -140,9 +142,6 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     // sigma transformation JS -> C++.
     const Napi::Array sigma_js = argObj.Get("sigma").As<Napi::Array>();
 
-    // Temporary matrix.
-    std::vector<std::vector<int>> temp_matrix;
-
     // Data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
     if (!argObj.Has("dataReturnType") || !argObj.Get("dataReturnType").IsNumber()) {
         Napi::TypeError::New(
@@ -155,18 +154,31 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     int data_return_type = static_cast<int>(argObj.Get("dataReturnType").As<Napi::Number>());
     this->data_return_type = data_return_type;
 
+    // std::cout << "before ";//  << material_matrix_size;
+
+    // Temporary matrix.
+    std::vector<std::vector<int>> temp_matrix;
+
+    // std::cout << "--" << material_matrix_size << "--";
+
     // Transform input flatten matrix into 2-dimensional matrix.
     for (int i = 0; i < material_matrix_size; i++) {
         temp_matrix.push_back(std::vector<int>());
+        
         for (int j = 0; j < material_matrix_size; j++) {
             temp_matrix[i].push_back(
                 (int)material_matrix_js[i * material_matrix_size + j]
                     .As<Napi::Number>());
+            // std::cout << ", " << i;
         }
     }
 
-    const size_t rows = FdtdPml2D::GetRows();
-    const size_t cols = FdtdPml2D::GetCols();
+    // std::cout << "after";
+
+    // const size_t rows = FdtdPml2D::GetRows();
+    // const size_t cols = FdtdPml2D::GetCols();
+    const size_t rows = 220;
+    const size_t cols = 220;
 
     // Matrix size  coefficient.
     size_t coeff = rows / material_matrix_size;
@@ -224,7 +236,8 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     size_t src_position_row = static_cast<size_t>(relative_src_position_y * rows);
     size_t src_position_col = static_cast<size_t>(relative_src_position_x * cols);
 
-    fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
+    // fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
+    fdtd.InitializeFdtd();
 }
 
 // Fdtd method in 1D case.
@@ -233,41 +246,53 @@ Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
 
     std::vector<double> vect_X = {};
     std::vector<double> vect_Y = {};
-    std::vector<double> vect_Ez = {};
-    std::vector<double> vect_Hy = {};
-    std::vector<double> vect_Hx = {};
-    std::vector<double> vect_Energy = {};
+    std::vector<double> vect_Hz = {};
+    // std::vector<double> vect_Ez = {};
+    // std::vector<double> vect_Hy = {};
+    // std::vector<double> vect_Hx = {};
+    // std::vector<double> vect_Energy = {};
 
     double max = 0.001;
     double min = -0.001;
 
-    this->fdtd.CalcNextLayer(vect_X, vect_Y, vect_Ez, vect_Hy, vect_Hx, vect_Energy, max, min);
+    // this->fdtd.CalcNextLayer(vect_X, vect_Y, vect_Ez, vect_Hy, vect_Hx, vect_Energy, max, min);
+    this->fdtd.CalcNextLayer();
 
-    const size_t rows = FdtdPml2D::GetRows();
-    const size_t cols = FdtdPml2D::GetCols();
+    struct FdtdPml2D::Output fdtd_output = this->fdtd.GetValues();
+    size_t rows = fdtd_output.rows;
+    size_t cols = fdtd_output.cols;
+
+    // const size_t rows = FdtdPml2D::GetRows();
+    // const size_t cols = FdtdPml2D::GetCols();
+    // const size_t rows = 100;
+    // const size_t cols = 100;
 
     // Matrix sizes.
-    size_t client_rows = rows / fdtd.GetStep();
-    size_t client_cols = cols / fdtd.GetStep();
+    // size_t client_rows = rows / fdtd.GetStep();
+    // size_t client_cols = cols / fdtd.GetStep();
+    size_t client_rows = rows;
+    size_t client_cols = cols;
 
     const size_t js_arrays_size = client_rows * client_cols;
 
     // Creating JS arrays to store C++ arrays.
     Napi::Array js_data_X = Napi::Array::New(env, js_arrays_size);
     Napi::Array js_data_Y = Napi::Array::New(env, js_arrays_size);
-    Napi::Array js_data_Ez = Napi::Array::New(env, js_arrays_size);
-    Napi::Array js_data_Hy = Napi::Array::New(env, js_arrays_size);
-    Napi::Array js_data_Hx = Napi::Array::New(env, js_arrays_size);
-    Napi::Array js_data_Energy = Napi::Array::New(env, js_arrays_size);
+    Napi::Array js_data_Hz = Napi::Array::New(env, js_arrays_size);
+    // Napi::Array js_data_Ez = Napi::Array::New(env, js_arrays_size);
+    // Napi::Array js_data_Hy = Napi::Array::New(env, js_arrays_size);
+    // Napi::Array js_data_Hx = Napi::Array::New(env, js_arrays_size);
+    // Napi::Array js_data_Energy = Napi::Array::New(env, js_arrays_size);
 
     // Filling JS arrays with C++ arrays data.
     for (size_t i = 0; i < js_arrays_size; i++) {
-        js_data_X[i] = Napi::Number::New(env, vect_X[i]);
-        js_data_Y[i] = Napi::Number::New(env, vect_Y[i]);
-        js_data_Ez[i] = Napi::Number::New(env, vect_Ez[i]);
-        js_data_Hy[i] = Napi::Number::New(env, vect_Hy[i]);
-        js_data_Hx[i] = Napi::Number::New(env, vect_Hx[i]);
-        js_data_Energy[i] = Napi::Number::New(env, vect_Energy[i]);
+        js_data_X[i] = Napi::Number::New(env, fdtd_output.X[i]);
+        js_data_Y[i] = Napi::Number::New(env, fdtd_output.Y[i]);
+        js_data_Hz[i] = Napi::Number::New(env, fdtd_output.Hz[i]);
+        // js_data_Ez[i] = Napi::Number::New(env, vect_Ez[i]);
+        // js_data_Hy[i] = Napi::Number::New(env, vect_Hy[i]);
+        // js_data_Hx[i] = Napi::Number::New(env, vect_Hx[i]);
+        // js_data_Energy[i] = Napi::Number::New(env, vect_Energy[i]);
     }
 
     // Creating JS object to return.
@@ -276,38 +301,41 @@ Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
     data.Set("dataY", js_data_Y);
     data.Set("rows", client_rows);
     data.Set("cols", client_cols);
+    data.Set("dataEz", js_data_Hz);
+    data.Set("max", fdtd_output.maxHz);
+    data.Set("min", fdtd_output.minHz);
     data.Set("timeStep", fdtd.GetCurrentTimeStep());
 
-    switch (this->data_return_type) {
-        case 0:
-            data.Set("dataEz", js_data_Ez);
-            // max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
-            // min = *std::min_element(std::begin(vect_Ez), std::end(vect_Ez));
-            break;
-        case 1:
-            data.Set("dataHy", js_data_Hy);
-            // max = *std::max_element(std::begin(vect_Hy), std::end(vect_Hy));
-            // min = *std::min_element(std::begin(vect_Hy), std::end(vect_Hy));
-            break;
-        case 2:
-            data.Set("dataHx", js_data_Hx);
-            // max = *std::max_element(std::begin(vect_Hx), std::end(vect_Hx));
-            // min = *std::min_element(std::begin(vect_Hx), std::end(vect_Hx));
-            break;
-        case 3:
-            data.Set("dataEnergy", js_data_Energy);
-            // max = *std::max_element(std::begin(vect_Energy), std::end(vect_Energy));
-            // min = *std::min_element(std::begin(vect_Energy), std::end(vect_Energy));
-            break;
+    // switch (this->data_return_type) {
+    //     case 0:
+    //         data.Set("dataEz", js_data_Ez);
+    //         // max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
+    //         // min = *std::min_element(std::begin(vect_Ez), std::end(vect_Ez));
+    //         break;
+    //     case 1:
+    //         data.Set("dataHy", js_data_Hy);
+    //         // max = *std::max_element(std::begin(vect_Hy), std::end(vect_Hy));
+    //         // min = *std::min_element(std::begin(vect_Hy), std::end(vect_Hy));
+    //         break;
+    //     case 2:
+    //         data.Set("dataHx", js_data_Hx);
+    //         // max = *std::max_element(std::begin(vect_Hx), std::end(vect_Hx));
+    //         // min = *std::min_element(std::begin(vect_Hx), std::end(vect_Hx));
+    //         break;
+    //     case 3:
+    //         data.Set("dataEnergy", js_data_Energy);
+    //         // max = *std::max_element(std::begin(vect_Energy), std::end(vect_Energy));
+    //         // min = *std::min_element(std::begin(vect_Energy), std::end(vect_Energy));
+    //         break;
 
-        default:
-            // max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
-            // min = *std::min_element(std::begin(vect_Ez), std::end(vect_Ez));
-            break;
-    }
-    // Fill max and min values.
-    data.Set("max", max);
-    data.Set("min", min);
-
+    //     default:
+    //         // max = *std::max_element(std::begin(vect_Ez), std::end(vect_Ez));
+    //         // min = *std::min_element(std::begin(vect_Ez), std::end(vect_Ez));
+    //         break;
+    // }
+    // // Fill max and min values.
+    // data.Set("max", max);
+    // data.Set("min", min);
+    
     return data;
 }

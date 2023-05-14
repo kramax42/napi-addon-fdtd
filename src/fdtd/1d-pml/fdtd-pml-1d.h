@@ -7,6 +7,7 @@
 #include <algorithm>  // std::fill
 #include <iostream>
 #include <vector>
+#include <array>
 
 class FdtdPml1D {
     // Speed of light in nm/fs.
