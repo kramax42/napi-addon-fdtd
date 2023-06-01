@@ -32,10 +32,15 @@ var test1D = function () {
 var test2D = function () {
     var lambda = 1;
     var beamsize = 1;
-    var materialVector = [1, 0, 2, 0, 1, 1, 1, 1, 1];
-    var eps = [1.0, 1.2, 1.1];
-    var mu = [0.51, 0.5, 0.57];
-    var sigma = [1.0, 0.001, 1.0];
+    // const materialVector = [1, 0, 2, 0, 1, 1, 1,1 ,1];
+    // const materialVector = [1, 0, 1, 0, 1, 1, 1, 1 ,1];
+    var materialVector = [0, 0, 0, 0];
+    // const eps = [1.0, 1.2, 1.1];
+    // const mu = [0.51, 0.5, 0.57];
+    // const sigma = [1.0, 0.001, 1.0];
+    var eps = [1.2, 1.15];
+    var mu = [1, 1];
+    var sigma = [0, 1e+7];
     var srcPosition = [0.1, 0.1];
     var dataReturnType = 0;
     var isReload = true;
@@ -70,6 +75,6 @@ var test2DTFSF = function () {
     console.log(data);
 };
 // test1D();
-test2D();
-// test2DTFSF();
+// test2D();
+test2DTFSF();
 // testMemoryUsage();

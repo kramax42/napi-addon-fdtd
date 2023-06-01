@@ -33,10 +33,15 @@ const test1D = () => {
 const test2D = () => {
   const lambda = 1;
   const beamsize = 1;
-  const materialVector = [1, 0, 2, 0, 1, 1, 1,1 ,1];
-  const eps = [1.0, 1.2, 1.1];
-  const mu = [0.51, 0.5, 0.57];
-  const sigma = [1.0, 0.001, 1.0];
+  // const materialVector = [1, 0, 2, 0, 1, 1, 1,1 ,1];
+  // const materialVector = [1, 0, 1, 0, 1, 1, 1, 1 ,1];
+  const materialVector = [0,0,0,0];
+  // const eps = [1.0, 1.2, 1.1];
+  // const mu = [0.51, 0.5, 0.57];
+  // const sigma = [1.0, 0.001, 1.0];
+  const eps = [1.2, 1.15];
+  const mu = [1, 1];
+  const sigma = [0, 1e+7];
   const srcPosition = [0.1, 0.1];
   const dataReturnType = 0;
   let isReload = true;
@@ -83,7 +88,7 @@ const test2DTFSF = () => {
 
 
 // test1D();
-test2D();
+// test2D();
 
-// test2DTFSF();
+test2DTFSF();
 // testMemoryUsage();

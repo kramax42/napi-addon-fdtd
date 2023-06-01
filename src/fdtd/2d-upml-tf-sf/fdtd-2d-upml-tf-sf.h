@@ -110,20 +110,20 @@ class TFSF {
     // static constexpr size_t ny_a = 6;
     // static constexpr size_t ny_b = 24;
 
-    // static constexpr size_t nx_a = 60;
-    // static constexpr size_t nx_b = 160;
-    // static constexpr size_t ny_a = 60;
-    // static constexpr size_t ny_b = 160;
+    static constexpr size_t nx_a = 60;
+    static constexpr size_t nx_b = 160;
+    static constexpr size_t ny_a = 60;
+    static constexpr size_t ny_b = 160;
 
     // static constexpr size_t nx_a = 15;
     // static constexpr size_t nx_b = 205;
     // static constexpr size_t ny_a = 15;
     // static constexpr size_t ny_b = 205;
 
-    static constexpr size_t nx_a = 10;
-    static constexpr size_t nx_b = 209;
-    static constexpr size_t ny_a = 10;
-    static constexpr size_t ny_b = 209;
+    // static constexpr size_t nx_a = 10;
+    // static constexpr size_t nx_b = 209;
+    // static constexpr size_t ny_a = 10;
+    // static constexpr size_t ny_b = 209;
 
     // Pre-allocate 1D fields for TF/SF interface 
     // TM components
@@ -275,9 +275,9 @@ class TFSF {
     // }};
 
     std::array<std::array<size_t, 4>, 3> mat_conf = {{
-        {100, 25, 10, 85},
-        {100, 25, 105, 10},
-        {100, 25, 125, 80},
+        {100, 25, 80, 50},
+        {100, 25, 80, 50},
+        {100, 25, 80, 50},
         // {120, 10, 100, 20},
         // {140, 10, 100, 20}
 

@@ -97,7 +97,7 @@ class FdtdPml2D {
 
     size_t GetStep();
     size_t GetCurrentTimeStep();
-
+sqrt
     void SetParams(std::vector<std::vector<double>> &eps,
                    std::vector<std::vector<double>> &mu,
                    std::vector<std::vector<double>> &sigma,

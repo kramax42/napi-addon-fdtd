@@ -1,5 +1,6 @@
 #include <iostream> 
 #include <cmath>
+#include <array>
 #include "fdtd-2d.h"
 
 Napi::Object Fdtd2D::Init(Napi::Env env, Napi::Object exports) {
@@ -157,7 +158,17 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     // std::cout << "before ";//  << material_matrix_size;
 
     // Temporary matrix.
+    
+    // const size_t rows = FdtdPml2D::GetRows();
+    // const size_t cols = FdtdPml2D::GetCols();
+    //  const size_t nx = 220;
+    // static const size_t ny = 220;
+    static const size_t rows = 220;
+    static const size_t cols = 220;
+
+    // std::array<std::array<size_t, cols>, rows> temp_matrix;
     std::vector<std::vector<int>> temp_matrix;
+    std::vector<std::vector<int>> temp_matrix_2;
 
     // std::cout << "--" << material_matrix_size << "--";
 
@@ -169,19 +180,26 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
             temp_matrix[i].push_back(
                 (int)material_matrix_js[i * material_matrix_size + j]
                     .As<Napi::Number>());
-            // std::cout << ", " << i;
+            // temp_matrix[i][j] = 
+            //     (int)material_matrix_js[i * material_matrix_size + j]
+            //         .As<Napi::Number>();
         }
     }
 
-    // std::cout << "after";
-
-    // const size_t rows = FdtdPml2D::GetRows();
-    // const size_t cols = FdtdPml2D::GetCols();
-    const size_t rows = 220;
-    const size_t cols = 220;
 
     // Matrix size  coefficient.
     size_t coeff = rows / material_matrix_size;
+
+    
+    std::vector<double> eps;
+    std::vector<double> mu;
+    std::vector<double> sigma;
+
+    for( size_t i = 0; i < eps_js.Length(); ++i) {
+        eps.push_back(static_cast<double>(eps_js[i].As<Napi::Number>()));
+        mu.push_back(static_cast<double>(mu_js[i].As<Napi::Number>()));
+        sigma.push_back(static_cast<double>(sigma_js[i].As<Napi::Number>()));
+    }
 
     // Initialization eps, mu, sigma matrixes.
     std::vector<std::vector<double>> eps_matrix;
@@ -191,10 +209,15 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
         eps_matrix.push_back(std::vector<double>());
         mu_matrix.push_back(std::vector<double>());
         sigma_matrix.push_back(std::vector<double>());
+
+        temp_matrix_2.push_back(std::vector<int>());
+
         for (int j = 0; j < cols; j++) {
             eps_matrix[i].push_back(0);
             mu_matrix[i].push_back(0);
             sigma_matrix[i].push_back(0);
+
+            temp_matrix_2[i].push_back(0);
         }
     }
 
@@ -204,6 +227,9 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
             for (int k = 0; k < coeff; k++) {
                 for (int f = 0; f < coeff; f++) {
                     int index = temp_matrix[i][j];
+
+                    // temp_matrix_2[i * coeff + k][j * coeff + f] = index;
+                    temp_matrix_2[j * coeff + f][i * coeff + k] = index;
 
                     // Rotate matrix on 90 degree for correctness in numerical method.
                     // eps_matrix[j * coeff + f][i * coeff + k] = static_cast<double>(eps_js[index].As<Napi::Number>());
@@ -237,7 +263,8 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     size_t src_position_col = static_cast<size_t>(relative_src_position_x * cols);
 
     // fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
-    fdtd.InitializeFdtd();
+    // fdtd.InitializeFdtd();
+    fdtd.InitializeFdtd(temp_matrix_2, eps, mu, sigma, src_position_row, src_position_col);
 }
 
 // Fdtd method in 1D case.

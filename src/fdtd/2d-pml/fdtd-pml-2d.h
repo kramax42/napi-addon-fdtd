@@ -20,7 +20,7 @@
 #include <math.h>
 
 #define  MEDIACONSTANT    (2)
-#define  NUMBEROFITERATIONCONSTANT    (1400)          // was 300
+#define  NUMBEROFITERATIONCONSTANT    (1000)          // was 300
 #define  BIGLINESIZE    (8192) 
 
 
@@ -46,7 +46,7 @@ class FdtdPml2D {
     double  rmax, orderbc;
     static const size_t ie = 220;   //number of grid cells in x-direction
     static const size_t je = 220; //number of grid cells in y-direction
-    int ib, jb, is, js, nmax, iebc, jebc, ibbc, jbbc, iefbc, jefbc, ibfbc, jbfbc ;
+    int ib, jb, is, js, nmax, iebc, jebc, ibbc, jbbc, iefbc, jefbc, ibfbc, jbfbc;
     int  media;
     double  rtau, tau, delay;
     double  **ex;        //fields in main grid 
@@ -74,22 +74,22 @@ class FdtdPml2D {
     double  **cbey;
     double  **dahz;
     double  **dbhz;
-    double  **caexbcf ;   // pml coefficients
-    double  **cbexbcf ;
-    double  **caexbcb ;
-    double  **cbexbcb ;
-    double  **caexbcl ;
-    double  **cbexbcl ;
-    double  **caexbcr ;
-    double  **cbexbcr ;
-    double  **caeybcf ;
-    double  **cbeybcf ;
-    double  **caeybcb ;
-    double  **cbeybcb ;
-    double  **caeybcl ;
-    double  **cbeybcl ;
-    double  **caeybcr ;
-    double  **cbeybcr ;
+    double  **caexbcf;   // pml coefficients
+    double  **cbexbcf;
+    double  **caexbcb;
+    double  **cbexbcb;
+    double  **caexbcl;
+    double  **cbexbcl;
+    double  **caexbcr;
+    double  **cbexbcr;
+    double  **caeybcf;
+    double  **cbeybcf;
+    double  **caeybcb;
+    double  **cbeybcb;
+    double  **caeybcl;
+    double  **cbeybcl;
+    double  **caeybcr;
+    double  **cbeybcr;
     double  **dahzxbcf;
     double  **dbhzxbcf;
     double  **dahzxbcb;
@@ -110,10 +110,10 @@ class FdtdPml2D {
     double  ca1,cb1,y1,y2, sigmay,sigmays,da1,db1;
     double  x1,x2,sigmax,sigmaxs;
     double  minimumValue, maximumValue;
-    char  filename[BIGLINESIZE] ;
-    FILE *filePointer ;
+    char  filename[BIGLINESIZE];
+    FILE *filePointer;
     double  scaleValue;
-    int  iValue,plottingInterval,centery,centerx ;      
+    int  iValue,plottingInterval,centery,centerx;      
 
 
 
@@ -149,10 +149,18 @@ class FdtdPml2D {
     output.cols = je;
 
     // size_t flatten_array_size = ie * nyje
+    double min = -0.000001;
+    double max = 0.000001;
     for(size_t i = 0; i < ie; i += 1) {
         for(size_t j = 0; j < je; j += 1) {
             // output.Ez[i*je + j] = Ez[i][j];
             output.Hz[i*je + j] = hz[i][j];
+            if(hz[i][j] > max) {
+                max = hz[i][j];
+            }
+            if(hz[i][j] < min) {
+                min = hz[i][j];
+            }
             output.X[i*je + j] = i;
             output.Y[i*je + j] = j;
         }
@@ -161,8 +169,10 @@ class FdtdPml2D {
     // output.maxEz = *std::max_element(std::begin(output.Ez), std::end(output.Ez));
     // output.minEz = *std::min_element(std::begin(output.Ez), std::end(output.Ez));
 
-    output.maxHz = *std::max_element(std::begin(output.Hz), std::end(output.Hz));
-    output.minHz = *std::min_element(std::begin(output.Hz), std::end(output.Hz));
+    // output.maxHz = *std::max_element(std::begin(output.Hz), std::end(output.Hz));
+    // output.minHz = *std::min_element(std::begin(output.Hz), std::end(output.Hz));
+    output.maxHz = max;
+    output.minHz = min;
 	
 	return output;
     }
@@ -342,8 +352,8 @@ class FdtdPml2D {
         const size_t tau = 20;
         double src = -2.0 * ((n - t0) / tau) * std::exp(-1.0 * std::pow((n - t0) / tau, 2));
 
-        hz[is][js] = src;
-        // hz[is][js] = source[n];
+        // hz[is][js] = src;
+        hz[is][js] = source[n];
                        
          
         //***********************************************************************
@@ -469,11 +479,18 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
             pointer[i][j] = initialValue;
         } /* jForLoop */     
     } /* iForLoop */     
-    return(pointer) ;
+    return(pointer);
 }    
 
-
-    void  InitializeFdtd ()
+    // template <size_t ie, size_t je>
+    // template <typename TwoD>
+    // void  InitializeFdtd (TwoD&  material_matrix)
+    void  InitializeFdtd (std::vector<std::vector<int>> &material_matrix, std::vector<double> &eps,
+                   std::vector<double> &mur,
+                   std::vector<double> &sig, int src_position_row, int src_position_col)
+    // void  InitializeFdtd (size_t (&material_matrix)[ie][je])
+    
+    // void  InitializeFdtd ()
     {
    
 
@@ -484,8 +501,8 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     minimumValue = -0.1;
     maximumValue =  0.1;   
     plottingInterval = 0;
-    centery = 25 ;
-    centerx = 15 ;
+    centery = 25;
+    centerx = 15;
 
     //***********************************************************************
     //     Fundamental constants
@@ -500,6 +517,17 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     omega = 2.0 * pi * freq;        //center frequency in radians  
 
 
+    double eta1 = sqrt(mur[0]*muz/(eps[0]*epsz));
+    double eta2 = sqrt(mur[1]*muz/(eps[1]*epsz));
+    double reflection_coef = abs((eta2-eta1) / (eta2 + eta1));
+    double transmittance_coef = 1-reflection_coef;
+
+    std::cout << "eta1: " << eta1 << std::endl;
+    std::cout << "eta2: " << eta2 << std::endl;
+    std::cout << "reflection_coef: " << reflection_coef << std::endl;
+    std::cout << "transmittance_coef: " << 1-abs(reflection_coef) << std::endl;
+
+
     //***********************************************************************
     //     Grid parameters
     //***********************************************************************
@@ -510,8 +538,12 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     ib = ie + 1;            // one extra is needed for fields on the boundaries (ie Ex on top boundary, Ey on right boundary)
     jb = je + 1;            // ditto
      
-    is = 15;                //location of z-directed hard source
-    js = je / 2;            //location of z-directed hard source
+    // is = 15;                //location of z-directed hard source
+    // js = je / 2;            //location of z-directed hard source
+
+    // swap later
+    js = src_position_row;                //location of z-directed hard source
+    is = src_position_col;            //location of z-directed hard source
      
     dx = 3.0e-3;            //space increment of square lattice  (meters)
     dt = dx / (2.0 * cc);   //time step,  seconds, courant limit, Taflove1995 page 177
@@ -621,19 +653,30 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     jcenter = je / 2;     // j-coordinate of cylinder's center
     for (i = 0; i < ie; i++) {
         for (j = 0; j < je; j++) {
-            temporaryi = (double  )(i - icenter) ;
-            temporaryj = (double  )(j - jcenter) ;
+            temporaryi = (double  )(i - icenter);
+            temporaryj = (double  )(j - jcenter);
             dist2 = (temporaryi + 0.5) * (temporaryi + 0.5) + (temporaryj) * (temporaryj);
-            if (dist2 <= (rad * rad)) {
-                caex[i][j] = ca[1];
-                cbex[i][j] = cb[1];
-            } /* if */     
-            // This looks tricky! Why can't caey/cbey use the same 'if' statement as caex/cbex above ?? 
-            dist2 = (temporaryj + 0.5) * (temporaryj + 0.5) + (temporaryi) * (temporaryi);
-            if (dist2 <= (rad * rad)) {
-                caey[i][j] = ca[1];
-                cbey[i][j] = cb[1];
-            } /* if */     
+
+            caex[i][j] = ca[material_matrix[i][j]];
+            cbex[i][j] = cb[material_matrix[i][j]];
+
+            caey[i][j] = ca[material_matrix[i][j]];
+            cbey[i][j] = cb[material_matrix[i][j]];
+
+            // std::cout << i*je + j << ": " << ca[material_matrix[i][j]] << std::endl;
+
+
+            // if (dist2 <= (rad * rad)) {
+            //     caex[i][j] = ca[1];
+            //     cbex[i][j] = cb[1];
+            // } /* if */     
+
+            // // This looks tricky! Why can't caey/cbey use the same 'if' statement as caex/cbex above ?? 
+            // dist2 = (temporaryj + 0.5) * (temporaryj + 0.5) + (temporaryi) * (temporaryi);
+            // if (dist2 <= (rad * rad)) {
+            //     caey[i][j] = ca[1];
+            //     cbey[i][j] = cb[1];
+            // } /* if */     
         } /* jForLoop */     
     } /* iForLoop */     
 
