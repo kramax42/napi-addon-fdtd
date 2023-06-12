@@ -44,6 +44,7 @@ var test2D = function () {
     var srcPosition = [0.1, 0.1];
     var dataReturnType = 0;
     var isReload = true;
+    var srcType = 1;
     var fdtd = new index_1.default.Fdtd2D({
         lambda: lambda,
         beamsize: beamsize,
@@ -53,11 +54,12 @@ var test2D = function () {
         mu: mu,
         sigma: sigma,
         dataReturnType: dataReturnType,
-        srcPosition: srcPosition
+        srcPosition: srcPosition,
+        srcType: srcType
     });
     var data;
-    for (var j = 0; j < 300; ++j) {
-        data = fdtd.getNextTimeLayer();
+    for (var j = 0; j < 10; ++j) {
+        data = fdtd.getNextTimeLayer({ dataReturnType: dataReturnType });
     }
     console.log(data);
 };
@@ -68,13 +70,13 @@ function testMemoryUsage() {
 var test2DTFSF = function () {
     var fdtd = new index_1.default.Fdtd2DTFSF();
     var data;
-    for (var j = 0; j < 30; ++j) {
+    for (var j = 0; j < 10; ++j) {
         data = fdtd.getNextTimeLayer();
     }
     // console.log(fdtd);
     console.log(data);
 };
 // test1D();
-// test2D();
-test2DTFSF();
+test2D();
+// test2DTFSF();
 // testMemoryUsage();

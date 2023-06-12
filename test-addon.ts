@@ -45,6 +45,7 @@ const test2D = () => {
   const srcPosition = [0.1, 0.1];
   const dataReturnType = 0;
   let isReload = true;
+  const srcType = 1;
 
   let fdtd = new addon.Fdtd2D({
     lambda,
@@ -55,12 +56,13 @@ const test2D = () => {
     mu,
     sigma,
     dataReturnType,
-    srcPosition
+    srcPosition,
+    srcType
   });
 
   let data;
-  for (let j = 0; j < 300; ++j) {
-    data = fdtd.getNextTimeLayer();
+  for (let j = 0; j < 10; ++j) {
+    data = fdtd.getNextTimeLayer({dataReturnType});
   }
   console.log(data);
 };
@@ -79,7 +81,7 @@ const test2DTFSF = () => {
   let fdtd = new addon.Fdtd2DTFSF();
 
   let data;
-  for (let j = 0; j < 30; ++j) {
+  for (let j = 0; j < 10; ++j) {
     data = fdtd.getNextTimeLayer();
   }
   // console.log(fdtd);
@@ -88,7 +90,7 @@ const test2DTFSF = () => {
 
 
 // test1D();
-// test2D();
+test2D();
 
-test2DTFSF();
+// test2DTFSF();
 // testMemoryUsage();

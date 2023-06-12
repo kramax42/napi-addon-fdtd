@@ -34,8 +34,11 @@ class TFSF {
 
     //  Main parameters
     //  Calculation area length per x and y axes
-    static constexpr double area_width = 2.5;
-    static constexpr double area_height = 2.5;
+    // in meters
+    // static constexpr double area_width = 2.5;
+    // static constexpr double area_height = 2.5;
+    static constexpr double area_width = 0.0006;
+    static constexpr double area_height = 0.0006;
 
     // Uniform grid points for x and y axes
     // static const size_t nx = 500;
@@ -54,7 +57,7 @@ class TFSF {
 
     // Excitation source amplitude and frequency [Hz]
     double E0 = 1.0;     
-    double frequency = 2.0e+9;   // 2 GHz
+    double frequency = 2.0e+12;   // 200 GHz
 
 
     //Width of alinea between total field area and calculation area border

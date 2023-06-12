@@ -84,6 +84,16 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     }
     double beamsize = (double)argObj.Get("beamsize").As<Napi::Number>();
 
+    // src_type
+    if (!argObj.Has("srcType") || !argObj.Get("srcType").IsNumber()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'srcType' property and it should be number.")
+            .ThrowAsJavaScriptException();
+        return;
+    }
+    int src_type = (int)argObj.Get("srcType").As<Napi::Number>();
+
     // Reload params checker.
     if (!argObj.Has("isReload") || !argObj.Get("isReload").IsBoolean()) {
         Napi::TypeError::New(
@@ -143,11 +153,12 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
     // sigma transformation JS -> C++.
     const Napi::Array sigma_js = argObj.Get("sigma").As<Napi::Array>();
 
-    // Data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3)
+    // Data return type('Ez' = 0 | 'Hy' = 1 |'Hx' = 2 |'Energy' = 3) old
+    // Data return type('Hz' = 0 | 'Ex' = 1 |'Ey' = 2 |)
     if (!argObj.Has("dataReturnType") || !argObj.Get("dataReturnType").IsNumber()) {
         Napi::TypeError::New(
             env,
-            "Object should contain 'dataReturnType' property and it should be number(integer).")
+            "Object should contain 'dataReturnType' property and it should be number(0, 1, 2).")
             .ThrowAsJavaScriptException();
         return;
     }
@@ -264,12 +275,38 @@ Fdtd2D::Fdtd2D(const Napi::CallbackInfo& info)
 
     // fdtd.SetParams(eps_matrix, mu_matrix, sigma_matrix, src_position_row, src_position_col);
     // fdtd.InitializeFdtd();
-    fdtd.InitializeFdtd(temp_matrix_2, eps, mu, sigma, src_position_row, src_position_col);
+    fdtd.InitializeFdtd(temp_matrix_2, eps, mu, sigma, src_position_row, src_position_col, src_type);
 }
 
 // Fdtd method in 1D case.
 Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
+
+    
+    if (info.Length() != 1) {
+        Napi::TypeError::New(env, "Wrong number of arguments")
+            .ThrowAsJavaScriptException();
+        // return;
+    }
+
+    if (!info[0].IsObject()) {
+        Napi::TypeError::New(env, "Wrong argument! Should be an object.")
+            .ThrowAsJavaScriptException();
+        // return;
+    }
+
+    Napi::Object argObj = info[0].As<Napi::Object>().ToObject();
+
+    // Data return type('Hz' = 0 | 'Ex' = 1 |'Ey' = 2 |)
+    if (!argObj.Has("dataReturnType") || !argObj.Get("dataReturnType").IsNumber()) {
+        Napi::TypeError::New(
+            env,
+            "Object should contain 'dataReturnType' property and it should be number(0, 1, 2).")
+            .ThrowAsJavaScriptException();
+        // return;
+    }
+
+    int data_return_type = static_cast<int>(argObj.Get("dataReturnType").As<Napi::Number>());
 
     std::vector<double> vect_X = {};
     std::vector<double> vect_Y = {};
@@ -285,7 +322,8 @@ Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
     // this->fdtd.CalcNextLayer(vect_X, vect_Y, vect_Ez, vect_Hy, vect_Hx, vect_Energy, max, min);
     this->fdtd.CalcNextLayer();
 
-    struct FdtdPml2D::Output fdtd_output = this->fdtd.GetValues();
+    //hz - 1, ex - 2, ey - 3
+    struct FdtdPml2D::Output fdtd_output = this->fdtd.GetValues(data_return_type);
     size_t rows = fdtd_output.rows;
     size_t cols = fdtd_output.cols;
 
@@ -306,6 +344,7 @@ Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
     Napi::Array js_data_X = Napi::Array::New(env, js_arrays_size);
     Napi::Array js_data_Y = Napi::Array::New(env, js_arrays_size);
     Napi::Array js_data_Hz = Napi::Array::New(env, js_arrays_size);
+    Napi::Array js_data_field = Napi::Array::New(env, js_arrays_size);
     // Napi::Array js_data_Ez = Napi::Array::New(env, js_arrays_size);
     // Napi::Array js_data_Hy = Napi::Array::New(env, js_arrays_size);
     // Napi::Array js_data_Hx = Napi::Array::New(env, js_arrays_size);
@@ -316,6 +355,7 @@ Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
         js_data_X[i] = Napi::Number::New(env, fdtd_output.X[i]);
         js_data_Y[i] = Napi::Number::New(env, fdtd_output.Y[i]);
         js_data_Hz[i] = Napi::Number::New(env, fdtd_output.Hz[i]);
+        js_data_field[i] = Napi::Number::New(env, fdtd_output.field[i]);
         // js_data_Ez[i] = Napi::Number::New(env, vect_Ez[i]);
         // js_data_Hy[i] = Napi::Number::New(env, vect_Hy[i]);
         // js_data_Hx[i] = Napi::Number::New(env, vect_Hx[i]);
@@ -329,6 +369,7 @@ Napi::Value Fdtd2D::GetNextTimeLayer(const Napi::CallbackInfo& info) {
     data.Set("rows", client_rows);
     data.Set("cols", client_cols);
     data.Set("dataEz", js_data_Hz);
+    data.Set("field", js_data_field);
     data.Set("max", fdtd_output.maxHz);
     data.Set("min", fdtd_output.minHz);
     data.Set("timeStep", fdtd.GetCurrentTimeStep());

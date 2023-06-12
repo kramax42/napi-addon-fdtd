@@ -16,6 +16,8 @@ class FdtdPml1D {
     // Courant factor.
     const double cfl_factor = 0.99;
 
+
+    // space widt = dx * nx = 40nm * 500 = 20000nm = 20mkm
     // Space step in nanometres.
     const double dx = 40.0;
 

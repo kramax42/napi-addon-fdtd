@@ -113,8 +113,10 @@ class FdtdPml2D {
     char  filename[BIGLINESIZE];
     FILE *filePointer;
     double  scaleValue;
-    int  iValue,plottingInterval,centery,centerx;      
+    int  iValue,plottingInterval,centery,centerx;     
 
+
+    int src_type;
 
 
    public:
@@ -130,51 +132,73 @@ class FdtdPml2D {
         // std::array<std::array<double, ny>, nx> Hz;
         // std::array<double, nx * ny> Ez;
         std::array<double, ie * je> Hz;
+        std::array<double, ie * je> field;
         std::array<size_t, ie * je> X;
         std::array<size_t, ie * je> Y;
         size_t rows;
         size_t cols;
-        // double maxEz;
-        // double minEz;
+        double max;
+        double min;
         double maxHz;
         double minHz;
     };
 
-    struct Output GetValues() {
+    //dataReturnType: 1 - Hz, 2-Ex, 3-Ey
+    struct Output GetValues(int dataReturnType) {
         struct Output output; 
 
-    // output.Ez = Ez;
-    // output.Hz = Hz;  
-    output.rows = ie;
-    output.cols = je;
+        // output.Ez = Ez;
+        // output.Hz = Hz;  
+        output.rows = ie;
+        output.cols = je;
 
-    // size_t flatten_array_size = ie * nyje
-    double min = -0.000001;
-    double max = 0.000001;
-    for(size_t i = 0; i < ie; i += 1) {
-        for(size_t j = 0; j < je; j += 1) {
-            // output.Ez[i*je + j] = Ez[i][j];
-            output.Hz[i*je + j] = hz[i][j];
-            if(hz[i][j] > max) {
-                max = hz[i][j];
+        // size_t flatten_array_size = ie * nyje
+        double min = -0.000001;
+        double max = 0.000001;
+        for(size_t i = 0; i < ie; i += 1) {
+            for(size_t j = 0; j < je; j += 1) {
+                output.Hz[i*je + j] = hz[i][j];
+                if(hz[i][j] > max) {
+                    max = hz[i][j];
+                }
+                if(hz[i][j] < min) {
+                    min = hz[i][j];
+                }
+                output.X[i*je + j] = i;
+                output.Y[i*je + j] = j;
+
+
+                double val;
+                if(dataReturnType == 1) {
+                    val =  hz[i][j];
+                } else if(dataReturnType == 2) {
+                    val =  ex[i][j];
+                } else if(dataReturnType == 3) {
+                    val =  ey[i][j];
+                }
+
+                output.field[i*je + j] = val;
+                if(val > max) {
+                    max = val;
+                }
+                if(val < min) {
+                    min = val;
+                }
+                
             }
-            if(hz[i][j] < min) {
-                min = hz[i][j];
-            }
-            output.X[i*je + j] = i;
-            output.Y[i*je + j] = j;
         }
-    }
 
-    // output.maxEz = *std::max_element(std::begin(output.Ez), std::end(output.Ez));
-    // output.minEz = *std::min_element(std::begin(output.Ez), std::end(output.Ez));
+        // output.maxEz = *std::max_element(std::begin(output.Ez), std::end(output.Ez));
+        // output.minEz = *std::min_element(std::begin(output.Ez), std::end(output.Ez));
 
-    // output.maxHz = *std::max_element(std::begin(output.Hz), std::end(output.Hz));
-    // output.minHz = *std::min_element(std::begin(output.Hz), std::end(output.Hz));
-    output.maxHz = max;
-    output.minHz = min;
-	
-	return output;
+        // output.maxHz = *std::max_element(std::begin(output.Hz), std::end(output.Hz));
+        // output.minHz = *std::min_element(std::begin(output.Hz), std::end(output.Hz));
+        output.maxHz = max;
+        output.minHz = min;
+        output.max = max;
+        output.min = min;
+        
+        return output;
     }
 
 
@@ -346,14 +370,28 @@ class FdtdPml2D {
     //     source[nn] = sin( omega * (temporary) * dt) * exp(-( (temporary * temporary)/(tau * tau) ) );
     // } /* forLoop */  
          
-        const size_t t0 = 20;
 
+        const double t0 = 20;
         // Beam width.
-        const size_t tau = 20;
-        double src = -2.0 * ((n - t0) / tau) * std::exp(-1.0 * std::pow((n - t0) / tau, 2));
+        const double tau = 30;
+        double src = 1*std::sin(2*3.14*freq*dt*n) * std::exp(-1.0 * std::pow((t0 - n) / tau, 2));
+        // double source = 20.0 * ((n - t0) / tau) * std::exp(-1.0 * std::pow((n - t0) / tau, 2));
+        
+        // double src = -20.0 * ((n - t0) / tau) * std::exp(-1.0 * std::pow((n - t0) / tau, 2));
+
+        // std::sin(2*3.14*freq*dt*n)
 
         // hz[is][js] = src;
-        hz[is][js] = source[n];
+        // hz[is][js] = source;
+        // hz[is][js] = src;
+
+        if(src_type == 1) {
+            hz[is][js] += 10*std::sin(2*3.14*freq*dt*n);// sin
+        } else {
+            hz[is][js] = source[n]; //gaussin
+        }
+        // 
+        
                        
          
         //***********************************************************************
@@ -487,19 +525,20 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     // void  InitializeFdtd (TwoD&  material_matrix)
     void  InitializeFdtd (std::vector<std::vector<int>> &material_matrix, std::vector<double> &eps,
                    std::vector<double> &mur,
-                   std::vector<double> &sig, int src_position_row, int src_position_col)
+                   std::vector<double> &sig, int src_position_row, int src_position_col, int src_type)
+                   // src_type: 1 - gaussian, 2 - sin
     // void  InitializeFdtd (size_t (&material_matrix)[ie][je])
     
     // void  InitializeFdtd ()
     {
    
-
+        this->src_type = src_type;
 
     //***********************************************************************
     //     Printing/Plotting variables
     //***********************************************************************
-    minimumValue = -0.1;
-    maximumValue =  0.1;   
+    minimumValue = -0.001;
+    maximumValue =  0.001;   
     plottingInterval = 0;
     centery = 25;
     centerx = 15;
@@ -512,7 +551,7 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     muz = 4.0 * pi * 1.0e-7;            //permeability of free space
     epsz = 1.0 / (cc * cc * muz);       //permittivity of free space
 
-    freq = 5.0e+9;                  //center frequency of source excitation (Hz)
+    freq = 6.0e+12;                  //center frequency of source excitation (Hz)
     lambda = cc / freq;             //center wavelength of source excitation
     omega = 2.0 * pi * freq;        //center frequency in radians  
 
@@ -545,13 +584,14 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     js = src_position_row;                //location of z-directed hard source
     is = src_position_col;            //location of z-directed hard source
      
-    dx = 3.0e-3;            //space increment of square lattice  (meters)
+    // grid size = dx * nx = 3.0e-6m * 220 = 660-6m = 660 mkm
+    dx = 3.0e-6;            //space increment of square lattice  (meters)
     dt = dx / (2.0 * cc);   //time step,  seconds, courant limit, Taflove1995 page 177
      
     nmax = NUMBEROFITERATIONCONSTANT;             //total number of time steps
      
-    iebc = 8;               //thickness of left and right PML region
-    jebc = 8;               //thickness of front and back PML region
+    iebc = 10;               //thickness of left and right PML region
+    jebc = 10;               //thickness of front and back PML region
     rmax = 0.00001;         // R(0) reflection coefficient (in %)  Nikolova part4 p.25
     orderbc = 2;            // m, grading order, optimal values: 2 <= m <= 6,  Nikolova part4 p.29
     ibbc = iebc + 1;
@@ -573,17 +613,21 @@ double  **AllocateMemory (int  imax, int  jmax, double  initialValue)
     //     Wave excitation
     //***********************************************************************
 
-    rtau = 160.0e-12;
+    rtau = 160.0e-15;
+    // rtau = 80.0e-15;
     tau = rtau / dt;
     delay = 3 * tau;
+    // delay = 1 * tau;
     for (i = 0; i < nmax; i++) {
         source[i] = 0.0;
     } /* iForLoop */     
     
     int nn;
-    for (nn = 0; nn < (int  )(7.0 * tau); nn++) {
+    // for (nn = 0; nn < (int  )(7.0 * tau); nn++) {
+    for (nn = 0; nn < nmax; nn++) {
         temporary = (double  )nn - delay;
-        source[nn] = sin( omega * (temporary) * dt) * exp(-( (temporary * temporary)/(tau * tau) ) );
+        source[nn] = 10*sin( omega * (temporary) * dt) * exp(-( (temporary * temporary)/(tau * tau) ) );
+        // source[nn] = 10*sin( omega * (temporary) * dt);
     } /* forLoop */     
 
 

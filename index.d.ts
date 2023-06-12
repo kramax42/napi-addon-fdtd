@@ -70,6 +70,7 @@ type GetData1D = (
     sigma: number[];
     dataReturnType: number;
     srcPosition: number[];
+    srcType: number;
   };
 
   type Fdtd2dOutput = {
@@ -80,6 +81,7 @@ type GetData1D = (
     rows: number;
     cols: number;  
     timestep: number;  
+    field: number[];
     dataEz?: number[];
     dataHx?: number[];
     dataHy?: number[];
@@ -96,7 +98,7 @@ type GetData1D = (
 
     class Fdtd2D {
       constructor(options: Fdtd2dOptions);
-      getNextTimeLayer(): Fdtd2dOutput;
+      getNextTimeLayer({dataReturnType}: {dataReturnType: number}): Fdtd2dOutput;
     }
 
     class Fdtd2DTFSF {
